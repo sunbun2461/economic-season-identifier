@@ -1,0 +1,600 @@
+import { useState, useEffect } from "react";
+
+const scenarios = [
+	{
+		id: "normal",
+		label: "Normal Market",
+		treasury: 4.5,
+		spread: 3.5,
+		color: "#64748b",
+		colorLight: "#f1f5f9",
+		icon: "📊",
+		description: "Typical market conditions with moderate risk appetite. Credit spreads are at historical averages, reflecting balanced growth expectations.",
+		sentiment: "Neutral",
+	},
+	{
+		id: "riskon",
+		label: "Risk-ON",
+		subtitle: "Spread Narrow",
+		treasury: 4.5,
+		spread: 1.5,
+		color: "#10b981",
+		colorLight: "#d1fae5",
+		colorDark: "#059669",
+		icon: "🟢",
+		description: "Investors are confident and reaching for yield. Spreads compress as demand for corporate bonds surges, pushing risk premiums to cycle lows.",
+		sentiment: "Bullish",
+		environment: ["Strong economic growth", "Low default rates", "Abundant liquidity", "High investor confidence"],
+		signals: ["Spreads below historical average", "High-yield bond inflows rising", "VIX at low levels", "Credit default swaps tightening"],
+	},
+	{
+		id: "riskoff",
+		label: "Risk-OFF",
+		subtitle: "Spread Wide",
+		treasury: 4.5,
+		spread: 6.5,
+		color: "#ef4444",
+		colorLight: "#fee2e2",
+		colorDark: "#dc2626",
+		icon: "🔴",
+		description: "Fear dominates. Investors flee corporate bonds for the safety of Treasuries, causing spreads to blow out as risk premiums spike dramatically.",
+		sentiment: "Bearish",
+		environment: ["Economic slowdown or recession", "Rising default expectations", "Liquidity drying up", "Flight to quality"],
+		signals: ["Spreads above historical average", "High-yield bond outflows", "VIX elevated", "Credit default swaps widening"],
+	},
+];
+
+const components = {
+	treasury: {
+		id: "treasury",
+		label: "Treasury",
+		icon: "🏛️",
+		color: "#3b82f6",
+		colorLight: "#dbeafe",
+		colorDark: "#2563eb",
+		sublabel: "Risk-Free Rate",
+		detail: {
+			description: "The baseline return on lending to the U.S. government — considered the safest investment in the world. All other yields are built on top of this foundation.",
+			factors: ["Fed funds rate", "Inflation expectations", "Global demand for safety", "Government debt supply"],
+		},
+	},
+	spread: {
+		id: "spread",
+		label: "Risk Premium",
+		icon: "⚡",
+		color: "#f97316",
+		colorLight: "#ffedd5",
+		colorDark: "#ea580c",
+		sublabel: "Credit Spread",
+		detail: {
+			description: "The extra yield investors demand for taking on the risk that a corporation might default. This spread widens and narrows based on market confidence.",
+			factors: ["Credit quality of issuer", "Market risk appetite", "Default probability", "Liquidity conditions"],
+		},
+	},
+	corp: {
+		id: "corp",
+		label: "Corp Bond",
+		icon: "🏢",
+		color: "#6366f1",
+		colorLight: "#e0e7ff",
+		colorDark: "#4f46e5",
+		sublabel: "Total Yield",
+		detail: {
+			description: "The total return an investor earns from a corporate bond — the sum of the risk-free Treasury rate and the credit spread. This is the actual yield-to-maturity.",
+			factors: ["Treasury yield (base)", "Credit spread (risk)", "Bond maturity/duration", "Issuer credit rating"],
+		},
+	},
+};
+
+export default function CreditSpread() {
+	const [activeScenario, setActiveScenario] = useState(0);
+	const [activeComponent, setActiveComponent] = useState(null);
+	const [animReady, setAnimReady] = useState(false);
+	const [displaySpread, setDisplaySpread] = useState(3.5);
+	const [displayTreasury, setDisplayTreasury] = useState(4.5);
+
+	useEffect(() => {
+		setTimeout(() => setAnimReady(true), 200);
+	}, []);
+
+	useEffect(() => {
+		const target = scenarios[activeScenario];
+		const startSpread = displaySpread;
+		const startTreasury = displayTreasury;
+		const duration = 600;
+		let start = null;
+
+		const animate = (ts) => {
+			if (!start) start = ts;
+			const p = Math.min((ts - start) / duration, 1);
+			const ease = 1 - Math.pow(1 - p, 3);
+			setDisplaySpread(startSpread + (target.spread - startSpread) * ease);
+			setDisplayTreasury(startTreasury + (target.treasury - startTreasury) * ease);
+			if (p < 1) requestAnimationFrame(animate);
+		};
+		requestAnimationFrame(animate);
+	}, [activeScenario]);
+
+	const total = displayTreasury + displaySpread;
+	const scenario = scenarios[activeScenario];
+	const activeComp = activeComponent ? components[activeComponent] : null;
+
+	// Bar widths (proportional)
+	const maxRate = 12;
+	const treasuryW = (displayTreasury / maxRate) * 100;
+	const spreadW = (displaySpread / maxRate) * 100;
+
+	return (
+		<div
+			style={{
+				minHeight: "100vh",
+				background: "linear-gradient(160deg, #f8fafc 0%, #f1f5f9 40%, #e8edf3 100%)",
+				fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				padding: "2rem",
+			}}
+		>
+			<link
+				href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+				rel="stylesheet"
+			/>
+			<style>{`
+        @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+			<div style={{ maxWidth: 1020, width: "100%" }}>
+				{/* Header */}
+				<div style={{ textAlign: "center", marginBottom: "2rem" }}>
+					<p style={{ fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#94a3b8", marginBottom: "0.5rem" }}>
+						Fixed Income Pricing
+					</p>
+					<h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "2.4rem", fontWeight: 700, color: "#0f172a", margin: 0, lineHeight: 1.2 }}>
+						The Credit Spread
+					</h1>
+					<p style={{ color: "#64748b", fontSize: "0.95rem", marginTop: "0.6rem", maxWidth: 540, marginLeft: "auto", marginRight: "auto" }}>
+						Corporate bond yields are built from two parts — the risk-free rate and a premium for taking on credit risk.
+					</p>
+				</div>
+
+				<div style={{ display: "flex", gap: "2.5rem", alignItems: "center", justifyContent: "center", flexWrap: "wrap" }}>
+					{/* Main diagram */}
+					<div style={{ flex: "1 1 520px", maxWidth: 600 }}>
+						<div
+							style={{
+								background: "white",
+								borderRadius: 24,
+								padding: "2rem",
+								boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)",
+								border: "1px solid #e2e8f0",
+								opacity: animReady ? 1 : 0,
+								transform: animReady ? "translateY(0)" : "translateY(16px)",
+								transition: "all 0.6s ease",
+							}}
+						>
+							{/* Equation: Treasury + Spread = Corp Bond */}
+							<div
+								style={{
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "center",
+									gap: "0.8rem",
+									marginBottom: "2rem",
+									flexWrap: "wrap",
+								}}
+							>
+								{/* Treasury card */}
+								<div
+									onClick={() => setActiveComponent(activeComponent === "treasury" ? null : "treasury")}
+									style={{
+										cursor: "pointer",
+										background: `linear-gradient(135deg, #3b82f6, #2563eb)`,
+										borderRadius: 16,
+										padding: "1.1rem 1.6rem",
+										textAlign: "center",
+										minWidth: 130,
+										boxShadow: activeComponent === "treasury"
+											? "0 4px 24px rgba(59,130,246,0.4), 0 0 0 3px rgba(59,130,246,0.2)"
+											: "0 4px 12px rgba(59,130,246,0.2)",
+										transition: "all 0.3s ease",
+										transform: activeComponent === "treasury" ? "scale(1.05)" : "scale(1)",
+									}}
+								>
+									<div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontWeight: 600, marginBottom: "0.15rem" }}>
+										🏛️ Treasury
+									</div>
+									<div
+										style={{
+											fontFamily: "'JetBrains Mono', monospace",
+											fontSize: "1.6rem",
+											fontWeight: 700,
+											color: "white",
+										}}
+									>
+										{displayTreasury.toFixed(1)}%
+									</div>
+								</div>
+
+								{/* Plus */}
+								<div
+									style={{
+										width: 36,
+										height: 36,
+										borderRadius: "50%",
+										background: "#f1f5f9",
+										display: "flex",
+										alignItems: "center",
+										justifyContent: "center",
+										fontSize: "1.1rem",
+										fontWeight: 700,
+										color: "#94a3b8",
+										flexShrink: 0,
+									}}
+								>
+									+
+								</div>
+
+								{/* Spread card */}
+								<div
+									onClick={() => setActiveComponent(activeComponent === "spread" ? null : "spread")}
+									style={{
+										cursor: "pointer",
+										background: `linear-gradient(135deg, #f97316, #ea580c)`,
+										borderRadius: 16,
+										padding: "1.1rem 1.6rem",
+										textAlign: "center",
+										minWidth: 130,
+										boxShadow: activeComponent === "spread"
+											? "0 4px 24px rgba(249,115,22,0.4), 0 0 0 3px rgba(249,115,22,0.2)"
+											: "0 4px 12px rgba(249,115,22,0.2)",
+										transition: "all 0.3s ease",
+										transform: activeComponent === "spread" ? "scale(1.05)" : "scale(1)",
+									}}
+								>
+									<div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontWeight: 600, marginBottom: "0.15rem" }}>
+										⚡ Risk Premium
+									</div>
+									<div
+										style={{
+											fontFamily: "'JetBrains Mono', monospace",
+											fontSize: "1.6rem",
+											fontWeight: 700,
+											color: "white",
+										}}
+									>
+										{displaySpread.toFixed(1)}%
+									</div>
+								</div>
+
+								{/* Equals */}
+								<div
+									style={{
+										width: 36,
+										height: 36,
+										borderRadius: "50%",
+										background: "#f1f5f9",
+										display: "flex",
+										alignItems: "center",
+										justifyContent: "center",
+										fontSize: "1.1rem",
+										fontWeight: 700,
+										color: "#94a3b8",
+										flexShrink: 0,
+									}}
+								>
+									=
+								</div>
+
+								{/* Corp Bond result */}
+								<div
+									onClick={() => setActiveComponent(activeComponent === "corp" ? null : "corp")}
+									style={{
+										cursor: "pointer",
+										background: `linear-gradient(135deg, #6366f1, #4f46e5)`,
+										borderRadius: 16,
+										padding: "1.1rem 1.6rem",
+										textAlign: "center",
+										minWidth: 130,
+										boxShadow: activeComponent === "corp"
+											? "0 4px 24px rgba(99,102,241,0.4), 0 0 0 3px rgba(99,102,241,0.2)"
+											: "0 4px 12px rgba(99,102,241,0.2)",
+										transition: "all 0.3s ease",
+										transform: activeComponent === "corp" ? "scale(1.05)" : "scale(1)",
+									}}
+								>
+									<div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontWeight: 600, marginBottom: "0.15rem" }}>
+										🏢 Corp Bond
+									</div>
+									<div
+										style={{
+											fontFamily: "'JetBrains Mono', monospace",
+											fontSize: "1.6rem",
+											fontWeight: 700,
+											color: "white",
+										}}
+									>
+										{total.toFixed(1)}%
+									</div>
+								</div>
+							</div>
+
+							{/* Sublabels */}
+							<div
+								style={{
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "center",
+									gap: "0.8rem",
+									marginBottom: "1.8rem",
+									flexWrap: "wrap",
+								}}
+							>
+								<span style={{ minWidth: 130, textAlign: "center", fontSize: "0.7rem", fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+									Risk-Free Rate
+								</span>
+								<span style={{ width: 36 }} />
+								<span style={{ minWidth: 130, textAlign: "center", fontSize: "0.7rem", fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+									Spread
+								</span>
+								<span style={{ width: 36 }} />
+								<span style={{ minWidth: 130, textAlign: "center", fontSize: "0.7rem", fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+									Total Yield
+								</span>
+							</div>
+
+							{/* Stacked bar visualization */}
+							<div style={{ marginBottom: "1.5rem", padding: "0 0.5rem" }}>
+								<div
+									style={{
+										display: "flex",
+										height: 42,
+										borderRadius: 12,
+										overflow: "hidden",
+										boxShadow: "inset 0 1px 3px rgba(0,0,0,0.06)",
+										border: "1px solid #e2e8f0",
+										background: "#f8fafc",
+									}}
+								>
+									<div
+										style={{
+											width: `${treasuryW}%`,
+											background: "linear-gradient(135deg, #3b82f6, #60a5fa)",
+											display: "flex",
+											alignItems: "center",
+											justifyContent: "center",
+											transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+											position: "relative",
+										}}
+									>
+										<span style={{ fontSize: "0.72rem", fontWeight: 700, color: "white", fontFamily: "'JetBrains Mono', monospace" }}>
+											{displayTreasury.toFixed(1)}%
+										</span>
+									</div>
+									<div
+										style={{
+											width: `${spreadW}%`,
+											background: `linear-gradient(135deg, ${scenario.id === "riskoff" ? "#ef4444" : scenario.id === "riskon" ? "#10b981" : "#f97316"}, ${scenario.id === "riskoff" ? "#dc2626" : scenario.id === "riskon" ? "#059669" : "#ea580c"})`,
+											display: "flex",
+											alignItems: "center",
+											justifyContent: "center",
+											transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.6s ease",
+											borderLeft: "2px solid rgba(255,255,255,0.3)",
+										}}
+									>
+										<span style={{ fontSize: "0.72rem", fontWeight: 700, color: "white", fontFamily: "'JetBrains Mono', monospace" }}>
+											{displaySpread.toFixed(1)}%
+										</span>
+									</div>
+								</div>
+								<div style={{ display: "flex", marginTop: "0.4rem" }}>
+									<div style={{ width: `${treasuryW}%`, textAlign: "center", transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+										<span style={{ fontSize: "0.62rem", color: "#3b82f6", fontWeight: 600 }}>Treasury</span>
+									</div>
+									<div style={{ width: `${spreadW}%`, textAlign: "center", transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+										<span style={{ fontSize: "0.62rem", color: scenario.color === "#64748b" ? "#f97316" : scenario.color, fontWeight: 600, transition: "color 0.6s ease" }}>
+											Spread
+										</span>
+									</div>
+								</div>
+							</div>
+
+							{/* Scenario buttons */}
+							<div
+								style={{
+									display: "flex",
+									gap: "0.5rem",
+									justifyContent: "center",
+									marginBottom: "1rem",
+									flexWrap: "wrap",
+								}}
+							>
+								{scenarios.map((s, i) => (
+									<button
+										key={s.id}
+										onClick={() => { setActiveScenario(i); setActiveComponent(null); }}
+										style={{
+											display: "flex",
+											alignItems: "center",
+											gap: "0.4rem",
+											padding: "0.55rem 1rem",
+											borderRadius: 10,
+											border: activeScenario === i ? `2px solid ${s.color}` : "2px solid #e2e8f0",
+											background: activeScenario === i ? s.colorLight : "white",
+											cursor: "pointer",
+											transition: "all 0.25s ease",
+											boxShadow: activeScenario === i ? `0 2px 8px ${s.color}20` : "none",
+										}}
+									>
+										<span style={{ fontSize: "0.8rem" }}>{s.icon}</span>
+										<div style={{ textAlign: "left" }}>
+											<div style={{ fontSize: "0.78rem", fontWeight: 700, color: activeScenario === i ? (s.colorDark || s.color) : "#334155" }}>
+												{s.label}
+											</div>
+											{s.subtitle && (
+												<div style={{ fontSize: "0.62rem", color: activeScenario === i ? (s.colorDark || s.color) : "#94a3b8", fontWeight: 500 }}>
+													{s.subtitle}
+												</div>
+											)}
+										</div>
+									</button>
+								))}
+							</div>
+
+							{/* Tagline */}
+							<p style={{ textAlign: "center", fontSize: "0.72rem", color: "#94a3b8", fontStyle: "italic" }}>
+								Wider = market fears defaults · Narrow = confidence is high
+							</p>
+						</div>
+					</div>
+
+					{/* Detail Panel */}
+					<div style={{ flex: "1 1 280px", maxWidth: 340, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+						{activeComp ? (
+							<div
+								key={activeComp.id}
+								style={{
+									background: "white",
+									borderRadius: 18,
+									padding: "1.8rem",
+									boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+									border: `1px solid ${activeComp.color}18`,
+									animation: "fadeSlideIn 0.35s ease",
+								}}
+							>
+								<div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1rem" }}>
+									<span style={{ fontSize: "1.4rem", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: activeComp.colorLight, borderRadius: 12 }}>
+										{activeComp.icon}
+									</span>
+									<div>
+										<h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.4rem", fontWeight: 700, color: activeComp.color, margin: 0, lineHeight: 1.2 }}>
+											{activeComp.label}
+										</h2>
+										<span style={{ fontSize: "0.68rem", color: "#94a3b8", fontWeight: 500 }}>{activeComp.sublabel}</span>
+									</div>
+								</div>
+								<p style={{ fontSize: "0.83rem", color: "#475569", lineHeight: 1.7, marginBottom: "1rem" }}>
+									{activeComp.detail.description}
+								</p>
+								<div>
+									<p style={{ fontSize: "0.63rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "#94a3b8", marginBottom: "0.4rem" }}>
+										Key Drivers
+									</p>
+									<div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+										{activeComp.detail.factors.map((f, j) => (
+											<div key={j} style={{ display: "flex", alignItems: "center", gap: "0.45rem", padding: "0.35rem 0.6rem", borderRadius: 8, background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+												<span style={{ width: 4, height: 4, borderRadius: "50%", background: activeComp.color, flexShrink: 0 }} />
+												<span style={{ fontSize: "0.76rem", color: "#475569", fontWeight: 500 }}>{f}</span>
+											</div>
+										))}
+									</div>
+								</div>
+							</div>
+						) : scenario.id !== "normal" ? (
+							<div
+								key={scenario.id}
+								style={{
+									background: "white",
+									borderRadius: 18,
+									padding: "1.8rem",
+									boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+									border: `1px solid ${scenario.color}18`,
+									animation: "fadeSlideIn 0.35s ease",
+								}}
+							>
+								<div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1rem" }}>
+									<span style={{ fontSize: "1.4rem", width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", background: scenario.colorLight, borderRadius: 12 }}>
+										{scenario.icon}
+									</span>
+									<div>
+										<h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.4rem", fontWeight: 700, color: scenario.color, margin: 0, lineHeight: 1.2 }}>
+											{scenario.label}
+										</h2>
+										<span style={{ fontSize: "0.68rem", fontFamily: "'JetBrains Mono', monospace", color: scenario.colorDark, fontWeight: 500, background: scenario.colorLight, padding: "0.1rem 0.4rem", borderRadius: 5 }}>
+											Spread: {scenario.spread.toFixed(1)}% · Sentiment: {scenario.sentiment}
+										</span>
+									</div>
+								</div>
+								<p style={{ fontSize: "0.83rem", color: "#475569", lineHeight: 1.7, marginBottom: "0.8rem" }}>
+									{scenario.description}
+								</p>
+
+								<div style={{ marginBottom: "0.8rem" }}>
+									<p style={{ fontSize: "0.63rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "#94a3b8", marginBottom: "0.4rem" }}>
+										Environment
+									</p>
+									<div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+										{scenario.environment.map((e, j) => (
+											<span key={j} style={{ padding: "0.25rem 0.55rem", borderRadius: 20, fontSize: "0.68rem", fontWeight: 500, background: scenario.colorLight, color: scenario.colorDark, border: `1px solid ${scenario.color}25` }}>
+												{e}
+											</span>
+										))}
+									</div>
+								</div>
+
+								<div>
+									<p style={{ fontSize: "0.63rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "#94a3b8", marginBottom: "0.4rem" }}>
+										What to Watch
+									</p>
+									<div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+										{scenario.signals.map((s, j) => (
+											<div key={j} style={{ display: "flex", alignItems: "center", gap: "0.45rem", padding: "0.3rem 0.6rem", borderRadius: 8, background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+												<span style={{ width: 4, height: 4, borderRadius: "50%", background: scenario.color, flexShrink: 0 }} />
+												<span style={{ fontSize: "0.74rem", color: "#475569", fontWeight: 500 }}>{s}</span>
+											</div>
+										))}
+									</div>
+								</div>
+							</div>
+						) : (
+							<div
+								style={{
+									background: "white",
+									borderRadius: 18,
+									padding: "2rem",
+									textAlign: "center",
+									boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+									border: "1px solid #e2e8f0",
+								}}
+							>
+								<div style={{ fontSize: "2rem", marginBottom: "0.6rem", opacity: 0.5 }}>💳</div>
+								<p style={{ fontSize: "0.9rem", fontWeight: 600, color: "#334155", marginBottom: "0.3rem" }}>
+									Explore the spread
+								</p>
+								<p style={{ fontSize: "0.8rem", color: "#94a3b8", lineHeight: 1.6, marginBottom: "1.2rem" }}>
+									Click any card in the equation to learn about each component, or toggle between Risk-ON and Risk-OFF scenarios to see how spreads react.
+								</p>
+
+								<div style={{ padding: "0.9rem", borderRadius: 12, background: "#f8fafc", border: "1px solid #e2e8f0", textAlign: "left" }}>
+									<p style={{ fontSize: "0.65rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: "#94a3b8", marginBottom: "0.5rem" }}>
+										The Formula
+									</p>
+									<div style={{ display: "flex", alignItems: "center", gap: "0.4rem", justifyContent: "center", padding: "0.3rem 0" }}>
+										<span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#3b82f6" }}>🏛️ Treasury</span>
+										<span style={{ color: "#cbd5e1" }}>+</span>
+										<span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#f97316" }}>⚡ Spread</span>
+										<span style={{ color: "#cbd5e1" }}>=</span>
+										<span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#6366f1" }}>🏢 Corp Yield</span>
+									</div>
+									<div style={{ marginTop: "0.6rem", paddingTop: "0.6rem", borderTop: "1px solid #e2e8f0" }}>
+										<div style={{ display: "flex", justifyContent: "space-between", padding: "0.2rem 0" }}>
+											<span style={{ fontSize: "0.72rem", color: "#64748b" }}>🟢 Risk-ON</span>
+											<span style={{ fontSize: "0.72rem", color: "#10b981", fontWeight: 600 }}>Spreads narrow</span>
+										</div>
+										<div style={{ display: "flex", justifyContent: "space-between", padding: "0.2rem 0" }}>
+											<span style={{ fontSize: "0.72rem", color: "#64748b" }}>🔴 Risk-OFF</span>
+											<span style={{ fontSize: "0.72rem", color: "#ef4444", fontWeight: 600 }}>Spreads widen</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}

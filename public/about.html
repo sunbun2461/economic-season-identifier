@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Macro Cycle Tracker — About</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'DM Sans', 'Segoe UI', sans-serif; }
+
+    .about-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f1e3a 100%);
+      color: white;
+      padding: 5rem 1rem 4rem;
+      text-align: center;
+    }
+    .about-hero h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 1.2rem;
+    }
+    .about-hero p {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.65);
+      max-width: 580px;
+      margin: 0 auto;
+      line-height: 1.75;
+    }
+
+    .season-card-about {
+      border-radius: 20px;
+      padding: 1.8rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .season-card-about:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.14);
+    }
+
+    .page-card {
+      background: white;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      padding: 1.6rem;
+      display: flex;
+      gap: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .page-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+    }
+    .page-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--season-primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.88rem;
+      flex-shrink: 0;
+    }
+
+    .data-source-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: #475569;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <header id="site-header" class="site-header text-white sticky top-0 z-50"></header>
+
+  <div id="season-key-bar" class="overflow-x-auto sticky top-14 z-40">
+    <div id="phase-pills" class="flex min-w-max px-2"></div>
+  </div>
+
+  <!-- Hero -->
+  <section class="about-hero">
+    <div class="max-w-2xl mx-auto">
+      <p class="section-overline mb-4" style="color:rgba(255,255,255,0.4)">About This Tool</p>
+      <h1>Macro Cycle Tracker</h1>
+      <p>
+        A real-time economic season classifier that reads live FRED data,
+        identifies where we are in the interest rate cycle, and translates
+        that into actionable portfolio guidance — updated every 4 hours.
+      </p>
+      <a href="/" style="display:inline-block;margin-top:2rem;padding:0.75rem 2rem;background:var(--season-primary);color:white;border-radius:12px;font-weight:600;text-decoration:none;font-size:0.95rem;transition:opacity 0.2s">
+        Open Dashboard →
+      </a>
+    </div>
+  </section>
+
+  <main class="max-w-5xl mx-auto px-4 py-16 space-y-20">
+
+    <!-- The 4 Seasons -->
+    <section>
+      <p class="section-overline mb-3">Core Framework</p>
+      <h2 class="playfair text-3xl font-bold text-slate-900 mb-2">The 4 Economic Seasons</h2>
+      <p class="text-slate-500 mb-8 max-w-2xl leading-relaxed">
+        Every economy moves through a repeating cycle of four phases. The current season determines which assets historically perform best and how aggressively the Fed is likely to act.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+        <div class="season-card-about" style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-color:#6ee7b7">
+          <div class="flex items-center gap-3 mb-3">
+            <span style="font-size:2rem">🌱</span>
+            <div>
+              <h3 class="playfair text-xl font-bold" style="color:#059669">Spring</h3>
+              <span style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:#6ee7b7">Recovery Phase</span>
+            </div>
+          </div>
+          <p style="font-size:0.84rem;color:#065f46;line-height:1.7">The Fed is cutting rates (or has just cut) to stimulate a slowing economy. Unemployment is falling, GDP is recovering, and credit is loosening. <strong>Best for: equities, high-yield bonds, cyclical sectors.</strong></p>
+        </div>
+
+        <div class="season-card-about" style="background:linear-gradient(135deg,#fefce8,#fef9c3);border-color:#fde047">
+          <div class="flex items-center gap-3 mb-3">
+            <span style="font-size:2rem">☀️</span>
+            <div>
+              <h3 class="playfair text-xl font-bold" style="color:#ca8a04">Summer</h3>
+              <span style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:#fbbf24">Peak Expansion</span>
+            </div>
+          </div>
+          <p style="font-size:0.84rem;color:#713f12;line-height:1.7">Rates are at cycle lows, growth is strong, and confidence is high. Asset prices rise broadly. Inflation is beginning to stir. <strong>Best for: commodities, real estate, inflation-protected securities.</strong></p>
+        </div>
+
+        <div class="season-card-about" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);border-color:#fdba74">
+          <div class="flex items-center gap-3 mb-3">
+            <span style="font-size:2rem">🍂</span>
+            <div>
+              <h3 class="playfair text-xl font-bold" style="color:#ea580c">Autumn</h3>
+              <span style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:#fb923c">Tightening Phase</span>
+            </div>
+          </div>
+          <p style="font-size:0.84rem;color:#7c2d12;line-height:1.7">The Fed is hiking rates to fight inflation. Growth is slowing, yield curve is flattening, and volatility is rising. <strong>Best for: defensive stocks, cash, short-duration bonds.</strong></p>
+        </div>
+
+        <div class="season-card-about" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#93c5fd">
+          <div class="flex items-center gap-3 mb-3">
+            <span style="font-size:2rem">❄️</span>
+            <div>
+              <h3 class="playfair text-xl font-bold" style="color:#2563eb">Winter</h3>
+              <span style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:#60a5fa">Contraction Phase</span>
+            </div>
+          </div>
+          <p style="font-size:0.84rem;color:#1e3a8a;line-height:1.7">Rates are at cycle highs. GDP is declining or weak, unemployment rising, corporate profits under pressure. Flight to safety underway. <strong>Best for: government bonds, gold, defensive equities.</strong></p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section>
+      <p class="section-overline mb-3">Under the Hood</p>
+      <h2 class="playfair text-3xl font-bold text-slate-900 mb-2">How Classification Works</h2>
+      <p class="text-slate-500 mb-8 max-w-2xl leading-relaxed">
+        Seven macro indicators are scored against four season profiles. A weighted engine picks the best match and determines whether we're in the early or late phase.
+      </p>
+      <div class="space-y-4">
+        <div class="flex items-start gap-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="step-number">1</div>
+          <div>
+            <h4 class="font-semibold text-slate-800 mb-1">Fetch Live Data from FRED</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">Every 4 hours, the server fetches 16 time series from the St. Louis Fed (FRED) API: Fed Funds rate, treasury yields, CPI, PCE, unemployment, nonfarm payrolls, HY spreads, balance sheet, GDP, and more.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="step-number">2</div>
+          <div>
+            <h4 class="font-semibold text-slate-800 mb-1">Score Each Indicator</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">Each indicator scores 0–1 for each of the 4 seasons. For example: a rising Fed Funds rate scores high for Autumn, low for Spring. An inverted yield curve scores high for Winter.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="step-number">3</div>
+          <div>
+            <h4 class="font-semibold text-slate-800 mb-1">Apply Weighted Scoring</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">Scores are multiplied by weights: Fed Direction (25%) → Yield Curve (20%) → Unemployment (15%) → Inflation (15%) → HY Spread (10%) → NFP (10%) → Balance Sheet (5%). The highest total wins.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="step-number">4</div>
+          <div>
+            <h4 class="font-semibold text-slate-800 mb-1">Determine Early vs. Late</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">If leading indicators (yield curve, HY spread, claims) are already pointing toward the next season, the current season is classified as "late." Otherwise it's "early." This changes the portfolio strategy significantly.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="step-number">5</div>
+          <div>
+            <h4 class="font-semibold text-slate-800 mb-1">Detect Special Overlays</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">The engine checks for unusual conditions: insurance cuts (Fed cutting while employment is strong), stagflation (rising inflation + rising unemployment), aggressive hiking (50+ bp consecutive hikes), and more. Each overlay modifies the base portfolio model.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Site Guide -->
+    <section>
+      <p class="section-overline mb-3">Navigation Guide</p>
+      <h2 class="playfair text-3xl font-bold text-slate-900 mb-2">What Each Page Does</h2>
+      <p class="text-slate-500 mb-8 max-w-2xl leading-relaxed">
+        Six pages, each with a different purpose. Start with the Dashboard, then go deeper with the tools you find most useful.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div class="page-card">
+          <div class="page-icon" style="background:#ecfdf5">📊</div>
+          <div>
+            <h4 class="font-bold text-slate-800 mb-1">Dashboard <a href="/" class="text-xs text-emerald-600 font-medium ml-1 hover:underline">→ Open</a></h4>
+            <p class="text-sm text-slate-500 leading-relaxed">Live season classification, confidence score, key rates (Fed Funds, Treasuries, HY Spread, Mortgage), macro indicators, FOMC calendar, season scoring breakdown, and next-season prediction. Auto-refreshes every 30 minutes.</p>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <div class="page-icon" style="background:#eff6ff">🎓</div>
+          <div>
+            <h4 class="font-bold text-slate-800 mb-1">Learn <a href="/learn.html" class="text-xs text-blue-600 font-medium ml-1 hover:underline">→ Open</a></h4>
+            <p class="text-sm text-slate-500 leading-relaxed">Six interactive visualizations (yield curve shapes, rate cycle timeline, Fed dual mandate, credit spread, etc.), indicator explainer cards, all 8 phase deep-dives, allocation bars, historical case studies, and a 35-term glossary.</p>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <div class="page-icon" style="background:#fff7ed">🎯</div>
+          <div>
+            <h4 class="font-bold text-slate-800 mb-1">Playbook <a href="/playbook.html" class="text-xs text-orange-600 font-medium ml-1 hover:underline">→ Open</a></h4>
+            <p class="text-sm text-slate-500 leading-relaxed">The full portfolio recommendation for the current phase: allocation donut chart, Buy / Hold / Sell lists, sector overweight/underweight bars, bond duration guidance, active overlays, and a reference accordion for all 8 phases.</p>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <div class="page-icon" style="background:#fefce8">📜</div>
+          <div>
+            <h4 class="font-bold text-slate-800 mb-1">History <a href="/history.html" class="text-xs text-yellow-600 font-medium ml-1 hover:underline">→ Open</a></h4>
+            <p class="text-sm text-slate-500 leading-relaxed">35 years and 113 Fed rate decisions (1990–2026) in a filterable table. Color-coded by direction (green = cut, red = hike). Filter by decade, chair (Greenspan / Bernanke / Yellen / Powell), direction, or season.</p>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <div class="page-icon" style="background:#f5f3ff">📈</div>
+          <div>
+            <h4 class="font-bold text-slate-800 mb-1">Charts <a href="/charts.html" class="text-xs text-violet-600 font-medium ml-1 hover:underline">→ Open</a></h4>
+            <p class="text-sm text-slate-500 leading-relaxed">A curated library of 41 TradingView chart links, organized by category: Rates, Yields, Inflation, Employment, Credit, Growth, and Markets. Each opens TradingView in a new tab for live charting.</p>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <div class="page-icon" style="background:#f8fafc">ℹ️</div>
+          <div>
+            <h4 class="font-bold text-slate-800 mb-1">About</h4>
+            <p class="text-sm text-slate-500 leading-relaxed">This page. Background on the 4 economic seasons, how the classification engine works, what each page does, and the data sources used. Good starting point if you're new to macro cycle investing.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Data Sources -->
+    <section>
+      <p class="section-overline mb-3">Data & Methodology</p>
+      <h2 class="playfair text-3xl font-bold text-slate-900 mb-2">Data Sources</h2>
+      <p class="text-slate-500 mb-6 max-w-2xl leading-relaxed">
+        All macroeconomic data is sourced from public APIs and databases. No financial data is sold or stored beyond a 4-hour local cache.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <div class="data-source-chip"><span>🏛️</span> FRED (St. Louis Fed) — Live macro series</div>
+        <div class="data-source-chip"><span>📅</span> FOMC Calendar — 2026 meeting dates</div>
+        <div class="data-source-chip"><span>📜</span> Fed Rate History — 113 decisions, 1990–2026</div>
+        <div class="data-source-chip"><span>📊</span> TradingView — Chart links only (no data API)</div>
+        <div class="data-source-chip"><span>🔄</span> Cache TTL — 4 hours per series</div>
+        <div class="data-source-chip"><span>🔑</span> API Key — Your FRED key in .env</div>
+      </div>
+      <div class="mt-6 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <p class="text-sm font-semibold text-slate-700 mb-3">FRED Series Used</p>
+        <div class="font-mono text-xs text-slate-500 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1.5">
+          <span>FEDFUNDS</span><span>DFF</span><span>DGS2</span><span>DGS10</span>
+          <span>DGS30</span><span>T10Y2Y</span><span>T10Y3M</span><span>UNRATE</span>
+          <span>PAYEMS</span><span>CPIAUCSL</span><span>PCEPI</span><span>MORTGAGE30US</span>
+          <span>GDP</span><span>WALCL</span><span>BAMLH0A0HYM2</span><span>SP500</span>
+          <span>T5YIE</span><span>ICSA</span><span>DFEDTARU</span><span>DFEDTARL</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Getting Started -->
+    <section>
+      <p class="section-overline mb-3">Setup</p>
+      <h2 class="playfair text-3xl font-bold text-slate-900 mb-2">Getting Started</h2>
+      <p class="text-slate-500 mb-6 max-w-2xl leading-relaxed">
+        The server must be running locally for the dashboard and data to work.
+      </p>
+      <div class="bg-slate-900 rounded-2xl p-6 font-mono text-sm leading-loose">
+        <div class="text-slate-500 text-xs mb-3"># In your terminal, from the project folder:</div>
+        <div><span class="text-slate-400">$</span> <span class="text-green-400">npm install</span></div>
+        <div><span class="text-slate-400">$</span> <span class="text-green-400">cp .env.example .env</span> <span class="text-slate-600 text-xs ml-2"># then add your FRED API key</span></div>
+        <div><span class="text-slate-400">$</span> <span class="text-green-400">npm run dev</span></div>
+        <div class="mt-3 text-slate-500 text-xs">Server starts at http://localhost:3000</div>
+      </div>
+      <p class="text-sm text-slate-500 mt-4">
+        Get a free FRED API key at
+        <a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank" class="text-blue-600 hover:underline">fred.stlouisfed.org</a>
+        — takes 30 seconds to register.
+      </p>
+    </section>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <strong>⚠️ Disclaimer:</strong> This tool is for educational purposes only and does not constitute financial advice.
+      Economic season classifications are based on algorithmic analysis of public data and historical patterns.
+      Past performance does not guarantee future results. Market conditions can change rapidly and without warning.
+      The classifications, portfolio recommendations, and predictions shown are illustrative models, not personalized investment advice.
+      Always consult a registered financial advisor before making investment decisions.
+    </div>
+
+  </main>
+
+  <script src="/js/theme.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const { buildHeader, buildKeyBar } = window.MacroTheme;
+      buildHeader('about');
+      buildKeyBar(document.getElementById('phase-pills'));
+      // Try to apply live theme if server is running
+      fetch('/api/data')
+        .then(r => r.json())
+        .then(d => window.MacroTheme.applyTheme(d.season.season, d.season.phase))
+        .catch(() => {}); // Silently fail if server is offline
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,663 @@
+import { useState, useEffect, useRef } from "react";
+
+const nodes = {
+  fed: {
+    id: "fed",
+    label: "Fed Funds Rate",
+    subtitle: "The overnight lending rate set by the Federal Reserve",
+    icon: "🏛️",
+    color: "#3b82f6",
+    colorLight: "#dbeafe",
+    tier: 0,
+    detail: {
+      description: "The federal funds rate is the interest rate at which banks lend reserve balances to each other overnight. It's the primary tool the Fed uses to influence monetary policy.",
+      mechanism: "The Federal Open Market Committee (FOMC) meets ~8 times per year to set a target range. This single decision cascades through the entire financial system.",
+      effects: ["Controls short-term borrowing costs", "Signals Fed's economic outlook", "Anchors all other interest rates", "Influences USD strength globally"],
+    },
+  },
+  treasury: {
+    id: "treasury",
+    label: "Treasury Yields",
+    subtitle: "Government bond rates across all maturities",
+    icon: "📜",
+    color: "#8b5cf6",
+    colorLight: "#ede9fe",
+    tier: 1,
+    detail: {
+      description: "Treasury yields represent the return on U.S. government debt. They serve as the risk-free benchmark that all other rates are priced against.",
+      mechanism: "When the Fed raises rates, short-term Treasury yields rise almost immediately. Longer-term yields respond to growth and inflation expectations.",
+      effects: ["Benchmark for all debt pricing", "Reflects inflation expectations", "Drives bond market valuations", "Shapes the yield curve"],
+    },
+  },
+  mortgages: {
+    id: "mortgages",
+    label: "Mortgages",
+    subtitle: "Home loan interest rates",
+    icon: "🏠",
+    color: "#10b981",
+    colorLight: "#d1fae5",
+    tier: 2,
+    impact: "Housing",
+    impactIcon: "🏘️",
+    detail: {
+      description: "Mortgage rates are closely tied to the 10-year Treasury yield. Even small rate changes dramatically affect monthly payments and home affordability.",
+      mechanism: "Lenders price mortgages as a spread above Treasury yields to compensate for prepayment and credit risk. The spread typically ranges from 1.5–2.5%.",
+      effects: ["Determines monthly payment amounts", "Drives housing affordability", "Affects home prices & demand", "Impacts construction activity"],
+    },
+  },
+  corpBonds: {
+    id: "corpBonds",
+    label: "Corp Bonds",
+    subtitle: "Corporate debt interest rates",
+    icon: "🏢",
+    color: "#f97316",
+    colorLight: "#ffedd5",
+    tier: 2,
+    impact: "Stocks",
+    impactIcon: "📊",
+    detail: {
+      description: "Corporate bond yields equal the Treasury rate plus a credit spread. When rates rise, borrowing costs increase for companies, squeezing profit margins.",
+      mechanism: "Companies issue bonds to fund operations and growth. Higher yields mean higher debt servicing costs, which flow directly to earnings and stock valuations.",
+      effects: ["Increases corporate borrowing costs", "Pressures profit margins", "Affects stock valuations (DCF)", "Influences M&A activity"],
+    },
+  },
+  savings: {
+    id: "savings",
+    label: "Savings / CDs",
+    subtitle: "Deposit and certificate rates",
+    icon: "💰",
+    color: "#eab308",
+    colorLight: "#fef9c3",
+    tier: 2,
+    impact: "$ Return",
+    impactIcon: "💵",
+    detail: {
+      description: "Banks set savings and CD rates based on the fed funds rate. Higher rates mean savers earn more, but banks may lag in passing along increases.",
+      mechanism: "Banks profit from the spread between what they pay depositors and what they charge borrowers. Deposit rates typically trail the fed funds rate by a margin.",
+      effects: ["Determines savings account APY", "Affects CD and money market rates", "Influences consumer spending vs saving", "Drives deposit flows between banks"],
+    },
+  },
+};
+
+const connections = [
+  { from: "fed", to: "treasury" },
+  { from: "treasury", to: "mortgages" },
+  { from: "treasury", to: "corpBonds" },
+  { from: "treasury", to: "savings" },
+];
+
+export default function HowRatesFlow() {
+  const [activeNode, setActiveNode] = useState(null);
+  const [animStage, setAnimStage] = useState(0);
+  const [hoveredNode, setHoveredNode] = useState(null);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setAnimStage(1), 100);
+    const t2 = setTimeout(() => setAnimStage(2), 500);
+    const t3 = setTimeout(() => setAnimStage(3), 900);
+    const t4 = setTimeout(() => setAnimStage(4), 1300);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+  }, []);
+
+  const active = activeNode ? nodes[activeNode] : null;
+
+  const tierOpacity = (tier) => {
+    if (animStage >= tier + 1) return 1;
+    return 0;
+  };
+
+  const tierTranslate = (tier) => {
+    if (animStage >= tier + 1) return "translateY(0)";
+    return "translateY(18px)";
+  };
+
+  const connOpacity = (tier) => {
+    if (tier === 0 && animStage >= 2) return 1;
+    if (tier === 1 && animStage >= 3) return 1;
+    if (tier === 2 && animStage >= 4) return 1;
+    return 0;
+  };
+
+  const NodeCard = ({ node, style: extraStyle }) => {
+    const isActive = activeNode === node.id;
+    const isHovered = hoveredNode === node.id;
+    const isDimmed = activeNode && !isActive;
+
+    return (
+      <div
+        onClick={() => setActiveNode(activeNode === node.id ? null : node.id)}
+        onMouseEnter={() => setHoveredNode(node.id)}
+        onMouseLeave={() => setHoveredNode(null)}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "0.4rem",
+          cursor: "pointer",
+          opacity: tierOpacity(node.tier),
+          transform: `${tierTranslate(node.tier)} ${isHovered || isActive ? "scale(1.04)" : "scale(1)"}`,
+          transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+          filter: isDimmed ? "grayscale(0.3) opacity(0.4)" : "none",
+          ...extraStyle,
+        }}
+      >
+        <div
+          style={{
+            background: `linear-gradient(135deg, ${node.color}, ${node.color}dd)`,
+            borderRadius: 16,
+            padding: "0.85rem 1.6rem",
+            boxShadow: isActive
+              ? `0 4px 20px ${node.color}40, 0 0 0 3px ${node.color}30`
+              : isHovered
+              ? `0 4px 16px ${node.color}25`
+              : `0 2px 8px ${node.color}20`,
+            transition: "all 0.3s ease",
+            position: "relative",
+            minWidth: 140,
+            textAlign: "center",
+          }}
+        >
+          {isActive && (
+            <div
+              style={{
+                position: "absolute",
+                inset: -3,
+                borderRadius: 19,
+                border: `2px solid ${node.color}50`,
+                animation: "pulseRing 2s ease infinite",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+          <div style={{ fontSize: "0.8rem", marginBottom: "0.15rem" }}>{node.icon}</div>
+          <div
+            style={{
+              color: "white",
+              fontWeight: 700,
+              fontSize: node.tier === 0 ? "1.05rem" : "0.92rem",
+              fontFamily: "'DM Sans', sans-serif",
+              textShadow: "0 1px 2px rgba(0,0,0,0.15)",
+            }}
+          >
+            {node.label}
+          </div>
+        </div>
+        {node.impact && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.3rem",
+              marginTop: "0.15rem",
+              opacity: animStage >= 4 ? 1 : 0,
+              transform: animStage >= 4 ? "translateY(0)" : "translateY(8px)",
+              transition: "all 0.5s ease 0.2s",
+            }}
+          >
+            <span style={{ fontSize: "0.85rem" }}>{node.impactIcon}</span>
+            <span
+              style={{
+                fontSize: "0.78rem",
+                color: "#64748b",
+                fontWeight: 500,
+              }}
+            >
+              {node.impact}
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(160deg, #f8fafc 0%, #f1f5f9 40%, #e8edf3 100%)",
+        fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+      }}
+    >
+      <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet"
+      />
+      <style>{`
+        @keyframes pulseRing {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 0.2; transform: scale(1.04); }
+        }
+        @keyframes flowDot {
+          0% { offset-distance: 0%; opacity: 0; }
+          15% { opacity: 1; }
+          85% { opacity: 1; }
+          100% { offset-distance: 100%; opacity: 0; }
+        }
+        @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      <div style={{ maxWidth: 1020, width: "100%" }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <p
+            style={{
+              fontSize: "0.7rem",
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#94a3b8",
+              marginBottom: "0.5rem",
+            }}
+          >
+            Monetary Policy Transmission
+          </p>
+          <h1
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: "2.4rem",
+              fontWeight: 700,
+              color: "#0f172a",
+              margin: 0,
+              lineHeight: 1.2,
+            }}
+          >
+            How Rates Flow
+          </h1>
+          <p
+            style={{
+              color: "#64748b",
+              fontSize: "0.95rem",
+              marginTop: "0.6rem",
+              maxWidth: 500,
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            Rate changes ripple from the Fed through the entire financial system, touching every corner of the economy.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "2.5rem",
+            alignItems: "center",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Flow Diagram */}
+          <div
+            style={{
+              flex: "1 1 480px",
+              maxWidth: 540,
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                background: "white",
+                borderRadius: 24,
+                padding: "2.5rem 2rem",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)",
+                border: "1px solid #e2e8f0",
+                position: "relative",
+              }}
+            >
+              {/* SVG for connection lines */}
+              <svg
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  pointerEvents: "none",
+                  overflow: "visible",
+                }}
+              >
+                <defs>
+                  <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                    <path d="M 0 1 L 6 4 L 0 7" fill="none" stroke="#8b5cf6" strokeWidth="1.5" />
+                  </marker>
+                  <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                    <path d="M 0 1 L 6 4 L 0 7" fill="none" stroke="#10b981" strokeWidth="1.5" />
+                  </marker>
+                  <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                    <path d="M 0 1 L 6 4 L 0 7" fill="none" stroke="#f97316" strokeWidth="1.5" />
+                  </marker>
+                  <marker id="arrowYellow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                    <path d="M 0 1 L 6 4 L 0 7" fill="none" stroke="#eab308" strokeWidth="1.5" />
+                  </marker>
+                </defs>
+              </svg>
+
+              {/* Tier 0: Fed */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 0 }}>
+                <NodeCard node={nodes.fed} />
+              </div>
+
+              {/* Connection: Fed → Treasury */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "0.6rem 0",
+                  opacity: connOpacity(0),
+                  transition: "opacity 0.5s ease",
+                }}
+              >
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
+                  <div style={{ width: 2, height: 28, background: "linear-gradient(to bottom, #3b82f6, #8b5cf6)", borderRadius: 1 }} />
+                  <svg width="12" height="8" viewBox="0 0 12 8">
+                    <path d="M 1 1 L 6 6 L 11 1" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Tier 1: Treasury */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 0 }}>
+                <NodeCard node={nodes.treasury} />
+              </div>
+
+              {/* Branching connections */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "0.5rem 0 0.3rem",
+                  opacity: connOpacity(1),
+                  transition: "opacity 0.5s ease",
+                }}
+              >
+                <svg width="360" height="40" viewBox="0 0 360 40" style={{ overflow: "visible" }}>
+                  {/* Left branch */}
+                  <path d="M 180 0 L 180 12 Q 180 20 172 24 L 60 38" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M 65 33 L 56 40 L 67 42" fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Center branch */}
+                  <path d="M 180 0 L 180 34" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M 176 30 L 180 38 L 184 30" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Right branch */}
+                  <path d="M 180 0 L 180 12 Q 180 20 188 24 L 300 38" fill="none" stroke="#eab308" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M 295 42 L 304 40 L 293 33" fill="none" stroke="#eab308" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+
+              {/* Tier 2: Three children */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: "1rem",
+                  paddingLeft: "0.5rem",
+                  paddingRight: "0.5rem",
+                }}
+              >
+                <NodeCard node={nodes.mortgages} />
+                <NodeCard node={nodes.corpBonds} />
+                <NodeCard node={nodes.savings} />
+              </div>
+
+              {/* Ripple tagline */}
+              <div
+                style={{
+                  textAlign: "center",
+                  marginTop: "1.8rem",
+                  paddingTop: "1rem",
+                  borderTop: "1px solid #f1f5f9",
+                  opacity: animStage >= 4 ? 1 : 0,
+                  transition: "opacity 0.8s ease 0.3s",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "0.78rem",
+                    color: "#94a3b8",
+                    fontStyle: "italic",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Rate changes ripple through the entire economy
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Detail Panel */}
+          <div
+            style={{
+              flex: "1 1 280px",
+              maxWidth: 340,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            {active ? (
+              <div
+                key={active.id}
+                style={{
+                  background: "white",
+                  borderRadius: 18,
+                  padding: "1.8rem",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+                  border: `1px solid ${active.color}18`,
+                  animation: "fadeSlideIn 0.35s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1rem" }}>
+                  <span
+                    style={{
+                      fontSize: "1.4rem",
+                      width: 44,
+                      height: 44,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: active.colorLight,
+                      borderRadius: 12,
+                    }}
+                  >
+                    {active.icon}
+                  </span>
+                  <div>
+                    <h2
+                      style={{
+                        fontFamily: "'Playfair Display', Georgia, serif",
+                        fontSize: "1.4rem",
+                        fontWeight: 700,
+                        color: active.color,
+                        margin: 0,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {active.label}
+                    </h2>
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        color: "#94a3b8",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {active.subtitle}
+                    </span>
+                  </div>
+                </div>
+
+                <p
+                  style={{
+                    fontSize: "0.83rem",
+                    color: "#475569",
+                    lineHeight: 1.7,
+                    marginBottom: "0.8rem",
+                  }}
+                >
+                  {active.detail.description}
+                </p>
+
+                <div
+                  style={{
+                    background: `${active.color}08`,
+                    border: `1px solid ${active.color}15`,
+                    borderRadius: 12,
+                    padding: "0.8rem",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "0.65rem",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      color: active.color,
+                      marginBottom: "0.35rem",
+                    }}
+                  >
+                    How it works
+                  </p>
+                  <p style={{ fontSize: "0.8rem", color: "#475569", lineHeight: 1.65 }}>
+                    {active.detail.mechanism}
+                  </p>
+                </div>
+
+                <div>
+                  <p
+                    style={{
+                      fontSize: "0.65rem",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.15em",
+                      color: "#94a3b8",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    Key Effects
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+                    {active.detail.effects.map((eff, j) => (
+                      <div
+                        key={j}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          padding: "0.35rem 0.65rem",
+                          borderRadius: 10,
+                          background: "#f8fafc",
+                          border: "1px solid #e2e8f0",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 5,
+                            height: 5,
+                            borderRadius: "50%",
+                            background: active.color,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span style={{ fontSize: "0.76rem", color: "#475569", fontWeight: 500 }}>
+                          {eff}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  background: "white",
+                  borderRadius: 18,
+                  padding: "2rem",
+                  textAlign: "center",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+                  border: "1px solid #e2e8f0",
+                }}
+              >
+                <div style={{ fontSize: "2rem", marginBottom: "0.6rem", opacity: 0.5 }}>🏛️</div>
+                <p style={{ fontSize: "0.9rem", fontWeight: 600, color: "#334155", marginBottom: "0.3rem" }}>
+                  Explore the flow
+                </p>
+                <p style={{ fontSize: "0.8rem", color: "#94a3b8", lineHeight: 1.6, marginBottom: "1.2rem" }}>
+                  Click on any node in the diagram to learn how that rate connects to the broader economy.
+                </p>
+
+                <div
+                  style={{
+                    padding: "0.9rem",
+                    borderRadius: 12,
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
+                    textAlign: "left",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "0.65rem",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      color: "#94a3b8",
+                      marginBottom: "0.6rem",
+                    }}
+                  >
+                    Transmission Chain
+                  </p>
+                  {[
+                    { icon: "🏛️", label: "Fed sets rate", color: "#3b82f6" },
+                    { icon: "📜", label: "Treasuries adjust", color: "#8b5cf6" },
+                    { icon: "📡", label: "Markets reprice", color: "#64748b" },
+                    { icon: "🌍", label: "Economy responds", color: "#64748b" },
+                  ].map((step, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.55rem",
+                        padding: "0.35rem 0",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: 6,
+                          background: `${step.color}12`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "0.7rem",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {step.icon}
+                      </span>
+                      <span style={{ fontSize: "0.78rem", color: "#475569", fontWeight: 500 }}>
+                        {step.label}
+                      </span>
+                      {i < 3 && (
+                        <span style={{ fontSize: "0.7rem", color: "#cbd5e1", marginLeft: "auto" }}>→</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

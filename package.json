@@ -1,0 +1,21 @@
+{
+  "name": "macro-tracker",
+  "version": "1.0.0",
+  "description": "Macro economic cycle tracker with season classification and portfolio guidance",
+  "type": "module",
+  "scripts": {
+    "dev": "npx tsx src/server.ts",
+    "start": "npx tsx src/server.ts",
+    "cli": "npx tsx src/cli.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.4.5"
+  }
+}

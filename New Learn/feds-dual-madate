@@ -1,0 +1,721 @@
+import { useState, useEffect, useRef } from "react";
+
+const mandates = {
+  employment: {
+    id: "employment",
+    label: "Employment",
+    subtitle: "Maximum Jobs",
+    icon: "👷",
+    color: "#10b981",
+    colorLight: "#d1fae5",
+    colorDark: "#059669",
+    side: "left",
+    detail: {
+      target: "Maximum sustainable employment",
+      description:
+        "The Fed aims to foster labor market conditions that achieve the highest level of employment consistent with price stability. This doesn't mean zero unemployment — some friction is natural.",
+      tools: ["Lower interest rates to stimulate hiring", "Quantitative easing to boost lending", "Forward guidance to build confidence"],
+      tradeoff:
+        "Pushing employment too high can overheat the economy, driving wages and prices up in an inflationary spiral.",
+      metrics: ["Unemployment rate", "Labor force participation", "Job openings (JOLTS)", "Wage growth"],
+    },
+  },
+  inflation: {
+    id: "inflation",
+    label: "Inflation",
+    subtitle: "Stable Prices",
+    icon: "📊",
+    color: "#f97316",
+    colorLight: "#ffedd5",
+    colorDark: "#ea580c",
+    side: "right",
+    detail: {
+      target: "2% annual inflation (PCE)",
+      description:
+        "The Fed targets 2% inflation as measured by the Personal Consumption Expenditures index. This rate is considered optimal — high enough to avoid deflation, low enough to preserve purchasing power.",
+      tools: ["Raise interest rates to cool demand", "Quantitative tightening to reduce liquidity", "Hawkish communication to anchor expectations"],
+      tradeoff:
+        "Aggressive inflation-fighting via rate hikes can slow growth and increase unemployment, potentially triggering a recession.",
+      metrics: ["Core PCE index", "CPI (headline & core)", "Inflation expectations", "Producer prices (PPI)"],
+    },
+  },
+};
+
+export default function FedDualMandate() {
+  const [activeMandate, setActiveMandate] = useState(null);
+  const [tilt, setTilt] = useState(0);
+  const [animReady, setAnimReady] = useState(false);
+  const [hoveredSide, setHoveredSide] = useState(null);
+  const tiltInterval = useRef(null);
+
+  useEffect(() => {
+    setTimeout(() => setAnimReady(true), 200);
+
+    // Gentle tilt animation
+    let angle = 0;
+    let direction = 1;
+    tiltInterval.current = setInterval(() => {
+      angle += 0.15 * direction;
+      if (angle > 3.5) direction = -1;
+      if (angle < -3.5) direction = 1;
+      setTilt(angle);
+    }, 50);
+
+    return () => clearInterval(tiltInterval.current);
+  }, []);
+
+  const active = activeMandate ? mandates[activeMandate] : null;
+
+  const effectiveTilt =
+    activeMandate === "employment" ? -6 : activeMandate === "inflation" ? 6 : tilt;
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(160deg, #f8fafc 0%, #f1f5f9 40%, #e8edf3 100%)",
+        fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+      }}
+    >
+      <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Playfair+Display:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+      />
+      <style>{`
+        @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes pulseGlow {
+          0%, 100% { box-shadow: 0 4px 20px rgba(59,130,246,0.15); }
+          50% { box-shadow: 0 4px 30px rgba(59,130,246,0.25); }
+        }
+      `}</style>
+
+      <div style={{ maxWidth: 1020, width: "100%" }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <p
+            style={{
+              fontSize: "0.7rem",
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#94a3b8",
+              marginBottom: "0.5rem",
+            }}
+          >
+            Federal Reserve Policy
+          </p>
+          <h1
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: "2.4rem",
+              fontWeight: 700,
+              color: "#0f172a",
+              margin: 0,
+              lineHeight: 1.2,
+            }}
+          >
+            The Fed's Dual Mandate
+          </h1>
+          <p
+            style={{
+              color: "#64748b",
+              fontSize: "0.95rem",
+              marginTop: "0.6rem",
+              maxWidth: 520,
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            Balancing two often-conflicting goals — maximum employment and stable prices — is the fundamental challenge of monetary policy.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "2.5rem",
+            alignItems: "center",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Scale Diagram */}
+          <div style={{ flex: "1 1 480px", maxWidth: 560 }}>
+            <div
+              style={{
+                background: "white",
+                borderRadius: 24,
+                padding: "2rem 2rem 1.5rem",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)",
+                border: "1px solid #e2e8f0",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {/* Subtle background pattern */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  opacity: 0.03,
+                  backgroundImage:
+                    "radial-gradient(circle at 25% 25%, #3b82f6 1px, transparent 1px), radial-gradient(circle at 75% 75%, #3b82f6 1px, transparent 1px)",
+                  backgroundSize: "30px 30px",
+                  pointerEvents: "none",
+                }}
+              />
+
+              {/* 2% Target Badge */}
+              <div
+                style={{
+                  textAlign: "center",
+                  marginBottom: "1.5rem",
+                  opacity: animReady ? 1 : 0,
+                  transform: animReady ? "translateY(0)" : "translateY(-10px)",
+                  transition: "all 0.6s ease 0.2s",
+                }}
+              >
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    background: "linear-gradient(135deg, #eff6ff, #dbeafe)",
+                    border: "1px solid #bfdbfe",
+                    borderRadius: 12,
+                    padding: "0.55rem 1.1rem",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "1.2rem",
+                      fontWeight: 700,
+                      color: "#2563eb",
+                    }}
+                  >
+                    2%
+                  </span>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontSize: "0.72rem", fontWeight: 600, color: "#1e40af" }}>
+                      Inflation Target
+                    </div>
+                    <div style={{ fontSize: "0.62rem", color: "#60a5fa" }}>Price Stability Anchor</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scale SVG */}
+              <svg
+                viewBox="0 0 500 300"
+                width="100%"
+                style={{
+                  display: "block",
+                  overflow: "visible",
+                  opacity: animReady ? 1 : 0,
+                  transition: "opacity 0.6s ease 0.4s",
+                }}
+              >
+                <defs>
+                  <linearGradient id="pillarGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#475569" />
+                    <stop offset="100%" stopColor="#334155" />
+                  </linearGradient>
+                  <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+                    <stop offset="50%" stopColor="#64748b" />
+                    <stop offset="100%" stopColor="#f97316" stopOpacity="0.3" />
+                  </linearGradient>
+                  <filter id="pillarShadow">
+                    <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#0f172a" floodOpacity="0.12" />
+                  </filter>
+                  <filter id="plateShadow">
+                    <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#0f172a" floodOpacity="0.1" />
+                  </filter>
+                  <linearGradient id="fedBadge" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#2563eb" />
+                  </linearGradient>
+                </defs>
+
+                {/* Base / Platform */}
+                <rect x="180" y="248" width="140" height="8" rx="4" fill="#cbd5e1" />
+                <rect x="210" y="244" width="80" height="4" rx="2" fill="#94a3b8" />
+
+                {/* Pillar */}
+                <g filter="url(#pillarShadow)">
+                  <rect x="240" y="130" width="20" height="118" rx="4" fill="url(#pillarGrad)" />
+                </g>
+
+                {/* Fed Badge on pillar */}
+                <g
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setActiveMandate(null)}
+                >
+                  <rect x="218" y="108" width="64" height="32" rx="10" fill="url(#fedBadge)" />
+                  <text
+                    x="250"
+                    y="129"
+                    textAnchor="middle"
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                      fill: "white",
+                      fontFamily: "'DM Sans', sans-serif",
+                    }}
+                  >
+                    The Fed
+                  </text>
+                </g>
+
+                {/* Tilting group */}
+                <g
+                  style={{
+                    transformOrigin: "250px 130px",
+                    transform: `rotate(${effectiveTilt}deg)`,
+                    transition: activeMandate ? "transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)" : "none",
+                  }}
+                >
+                  {/* Beam */}
+                  <rect x="45" y="126" width="410" height="8" rx="4" fill="#475569" />
+                  {/* Beam highlight */}
+                  <rect x="45" y="126" width="410" height="3" rx="2" fill="#64748b" opacity="0.5" />
+
+                  {/* Left chain/rope */}
+                  <line x1="95" y1="134" x2="95" y2="175" stroke="#94a3b8" strokeWidth="2" strokeDasharray="4 3" />
+                  <line x1="95" y1="134" x2="95" y2="175" stroke="#10b981" strokeWidth="1" strokeDasharray="4 3" opacity="0.5" />
+
+                  {/* Right chain/rope */}
+                  <line x1="405" y1="134" x2="405" y2="175" stroke="#94a3b8" strokeWidth="2" strokeDasharray="4 3" />
+                  <line x1="405" y1="134" x2="405" y2="175" stroke="#f97316" strokeWidth="1" strokeDasharray="4 3" opacity="0.5" />
+
+                  {/* Left plate - Employment */}
+                  <g
+                    filter="url(#plateShadow)"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setActiveMandate(activeMandate === "employment" ? null : "employment")}
+                    onMouseEnter={() => setHoveredSide("employment")}
+                    onMouseLeave={() => setHoveredSide(null)}
+                  >
+                    <ellipse
+                      cx="95"
+                      cy="185"
+                      rx="65"
+                      ry="18"
+                      fill={activeMandate === "employment" ? "#d1fae5" : hoveredSide === "employment" ? "#ecfdf5" : "#f0fdf4"}
+                      stroke="#10b981"
+                      strokeWidth={activeMandate === "employment" ? "2.5" : "1.5"}
+                      style={{ transition: "all 0.3s ease" }}
+                    />
+                    {activeMandate === "employment" && (
+                      <ellipse cx="95" cy="185" rx="70" ry="21" fill="none" stroke="#10b981" strokeWidth="1" opacity="0.3" />
+                    )}
+                  </g>
+
+                  {/* Left label */}
+                  <g
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setActiveMandate(activeMandate === "employment" ? null : "employment")}
+                  >
+                    <text
+                      x="95"
+                      y="183"
+                      textAnchor="middle"
+                      style={{
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                        fill: "#059669",
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      👷 Employment
+                    </text>
+                    <text
+                      x="95"
+                      y="197"
+                      textAnchor="middle"
+                      style={{
+                        fontSize: "0.55rem",
+                        fontWeight: 500,
+                        fill: "#64748b",
+                        fontFamily: "'DM Sans', sans-serif",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                      }}
+                    >
+                      Max Jobs
+                    </text>
+                  </g>
+
+                  {/* Right plate - Inflation */}
+                  <g
+                    filter="url(#plateShadow)"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setActiveMandate(activeMandate === "inflation" ? null : "inflation")}
+                    onMouseEnter={() => setHoveredSide("inflation")}
+                    onMouseLeave={() => setHoveredSide(null)}
+                  >
+                    <ellipse
+                      cx="405"
+                      cy="185"
+                      rx="65"
+                      ry="18"
+                      fill={activeMandate === "inflation" ? "#ffedd5" : hoveredSide === "inflation" ? "#fff7ed" : "#fffbeb"}
+                      stroke="#f97316"
+                      strokeWidth={activeMandate === "inflation" ? "2.5" : "1.5"}
+                      style={{ transition: "all 0.3s ease" }}
+                    />
+                    {activeMandate === "inflation" && (
+                      <ellipse cx="405" cy="185" rx="70" ry="21" fill="none" stroke="#f97316" strokeWidth="1" opacity="0.3" />
+                    )}
+                  </g>
+
+                  {/* Right label */}
+                  <g
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setActiveMandate(activeMandate === "inflation" ? null : "inflation")}
+                  >
+                    <text
+                      x="405"
+                      y="183"
+                      textAnchor="middle"
+                      style={{
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                        fill: "#ea580c",
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      📊 Inflation
+                    </text>
+                    <text
+                      x="405"
+                      y="197"
+                      textAnchor="middle"
+                      style={{
+                        fontSize: "0.55rem",
+                        fontWeight: 500,
+                        fill: "#64748b",
+                        fontFamily: "'DM Sans', sans-serif",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                      }}
+                    >
+                      Stable Prices
+                    </text>
+                  </g>
+
+                  {/* Fulcrum triangle */}
+                  <polygon points="250,126 242,115 258,115" fill="#475569" />
+                </g>
+              </svg>
+
+              {/* Tension indicator */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.8rem",
+                  marginTop: "0.6rem",
+                  opacity: animReady ? 1 : 0,
+                  transition: "opacity 0.6s ease 0.8s",
+                }}
+              >
+                <div
+                  style={{
+                    flex: 1,
+                    height: 3,
+                    borderRadius: 2,
+                    background: `linear-gradient(to right, #10b981, transparent)`,
+                    opacity: 0.3,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: "0.72rem",
+                    color: "#94a3b8",
+                    fontStyle: "italic",
+                    whiteSpace: "nowrap",
+                    padding: "0 0.5rem",
+                  }}
+                >
+                  ⚖️ These goals often conflict — that's why the Fed's job is hard
+                </span>
+                <div
+                  style={{
+                    flex: 1,
+                    height: 3,
+                    borderRadius: 2,
+                    background: `linear-gradient(to left, #f97316, transparent)`,
+                    opacity: 0.3,
+                  }}
+                />
+              </div>
+
+              {/* Bottom toggle buttons */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "0.8rem",
+                  marginTop: "1rem",
+                  paddingTop: "1rem",
+                  borderTop: "1px solid #f1f5f9",
+                }}
+              >
+                {Object.values(mandates).map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setActiveMandate(activeMandate === m.id ? null : m.id)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.4rem",
+                      padding: "0.5rem 1rem",
+                      borderRadius: 10,
+                      border: activeMandate === m.id ? `2px solid ${m.color}` : "2px solid transparent",
+                      background: activeMandate === m.id ? m.colorLight : "#f8fafc",
+                      cursor: "pointer",
+                      transition: "all 0.25s ease",
+                    }}
+                  >
+                    <span style={{ fontSize: "0.85rem" }}>{m.icon}</span>
+                    <span
+                      style={{
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        color: activeMandate === m.id ? m.colorDark : "#64748b",
+                      }}
+                    >
+                      {m.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Detail Panel */}
+          <div
+            style={{
+              flex: "1 1 280px",
+              maxWidth: 340,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            {active ? (
+              <div
+                key={active.id}
+                style={{
+                  background: "white",
+                  borderRadius: 18,
+                  padding: "1.8rem",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+                  border: `1px solid ${active.color}18`,
+                  animation: "fadeSlideIn 0.35s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1rem" }}>
+                  <span
+                    style={{
+                      fontSize: "1.4rem",
+                      width: 44,
+                      height: 44,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: active.colorLight,
+                      borderRadius: 12,
+                    }}
+                  >
+                    {active.icon}
+                  </span>
+                  <div>
+                    <h2
+                      style={{
+                        fontFamily: "'Playfair Display', Georgia, serif",
+                        fontSize: "1.4rem",
+                        fontWeight: 700,
+                        color: active.color,
+                        margin: 0,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {active.label}
+                    </h2>
+                    <span
+                      style={{
+                        fontSize: "0.68rem",
+                        fontFamily: "'JetBrains Mono', monospace",
+                        color: active.colorDark,
+                        fontWeight: 500,
+                        background: active.colorLight,
+                        padding: "0.15rem 0.45rem",
+                        borderRadius: 6,
+                      }}
+                    >
+                      Target: {active.detail.target}
+                    </span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: "0.83rem", color: "#475569", lineHeight: 1.7, marginBottom: "0.8rem" }}>
+                  {active.detail.description}
+                </p>
+
+                {/* Tools */}
+                <div
+                  style={{
+                    background: `${active.color}08`,
+                    border: `1px solid ${active.color}15`,
+                    borderRadius: 12,
+                    padding: "0.75rem",
+                    marginBottom: "0.8rem",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "0.63rem",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      color: active.color,
+                      marginBottom: "0.4rem",
+                    }}
+                  >
+                    Fed's Tools
+                  </p>
+                  {active.detail.tools.map((tool, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.2rem 0" }}>
+                      <span style={{ width: 4, height: 4, borderRadius: "50%", background: active.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.76rem", color: "#475569" }}>{tool}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Tradeoff */}
+                <div
+                  style={{
+                    background: "#fef2f2",
+                    border: "1px solid #fecaca",
+                    borderRadius: 12,
+                    padding: "0.75rem",
+                    marginBottom: "0.8rem",
+                  }}
+                >
+                  <p style={{ fontSize: "0.63rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: "#dc2626", marginBottom: "0.3rem" }}>
+                    ⚠️ The Tradeoff
+                  </p>
+                  <p style={{ fontSize: "0.76rem", color: "#7f1d1d", lineHeight: 1.6 }}>
+                    {active.detail.tradeoff}
+                  </p>
+                </div>
+
+                {/* Metrics */}
+                <div>
+                  <p style={{ fontSize: "0.63rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "#94a3b8", marginBottom: "0.4rem" }}>
+                    Key Metrics
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+                    {active.detail.metrics.map((m, j) => (
+                      <span
+                        key={j}
+                        style={{
+                          padding: "0.25rem 0.6rem",
+                          borderRadius: 20,
+                          fontSize: "0.7rem",
+                          fontWeight: 500,
+                          background: "#f8fafc",
+                          color: "#475569",
+                          border: "1px solid #e2e8f0",
+                        }}
+                      >
+                        {m}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  background: "white",
+                  borderRadius: 18,
+                  padding: "2rem",
+                  textAlign: "center",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+                  border: "1px solid #e2e8f0",
+                }}
+              >
+                <div style={{ fontSize: "2rem", marginBottom: "0.6rem", opacity: 0.5 }}>⚖️</div>
+                <p style={{ fontSize: "0.9rem", fontWeight: 600, color: "#334155", marginBottom: "0.3rem" }}>
+                  A delicate balance
+                </p>
+                <p style={{ fontSize: "0.8rem", color: "#94a3b8", lineHeight: 1.6, marginBottom: "1.2rem" }}>
+                  Click either side of the scale to explore how the Fed navigates its two competing mandates.
+                </p>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.6rem",
+                    justifyContent: "center",
+                  }}
+                >
+                  {Object.values(mandates).map((m) => (
+                    <div
+                      key={m.id}
+                      style={{
+                        flex: 1,
+                        padding: "0.8rem",
+                        borderRadius: 12,
+                        background: m.colorLight,
+                        border: `1px solid ${m.color}30`,
+                        textAlign: "center",
+                      }}
+                    >
+                      <div style={{ fontSize: "1.3rem", marginBottom: "0.3rem" }}>{m.icon}</div>
+                      <div style={{ fontSize: "0.78rem", fontWeight: 700, color: m.colorDark }}>{m.label}</div>
+                      <div style={{ fontSize: "0.68rem", color: "#64748b", marginTop: "0.15rem" }}>{m.subtitle}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "1rem",
+                    padding: "0.7rem",
+                    borderRadius: 10,
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  <p style={{ fontSize: "0.75rem", color: "#64748b", lineHeight: 1.6 }}>
+                    When the Fed lowers rates to boost jobs, it risks inflation. When it raises rates to fight inflation, it risks unemployment. This tension defines modern central banking.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,724 @@
+import { useState, useRef, useEffect } from "react";
+
+const curveTypes = [
+  {
+    name: "Normal",
+    color: "#10b981",
+    colorLight: "#d1fae5",
+    dash: false,
+    description: "Longer-term bonds yield more than shorter-term ones. This is the most common shape and signals that investors expect healthy economic growth and moderate inflation ahead.",
+    signal: "Growth expected",
+    signalIcon: "📈",
+    implications: ["Economic expansion ahead", "Healthy credit markets", "Banks profitable on lending", "Favorable for risk assets"],
+    points: [
+      { x: 0, y: 0.28 },
+      { x: 0.18, y: 0.42 },
+      { x: 0.4, y: 0.56 },
+      { x: 0.65, y: 0.68 },
+      { x: 1, y: 0.82 },
+    ],
+  },
+  {
+    name: "Flat",
+    color: "#94a3b8",
+    colorLight: "#f1f5f9",
+    dash: true,
+    description: "Short-term and long-term yields are nearly equal. This transitional shape often appears when the market is uncertain about future economic direction.",
+    signal: "Uncertainty / Transition",
+    signalIcon: "⚖️",
+    implications: ["Economic inflection point", "Monetary policy transition", "Market indecision", "Often precedes inversion"],
+    points: [
+      { x: 0, y: 0.48 },
+      { x: 0.25, y: 0.50 },
+      { x: 0.5, y: 0.52 },
+      { x: 0.75, y: 0.53 },
+      { x: 1, y: 0.54 },
+    ],
+  },
+  {
+    name: "Inverted",
+    color: "#ef4444",
+    colorLight: "#fee2e2",
+    dash: false,
+    description: "Short-term bonds yield more than long-term ones. Historically one of the most reliable recession predictors, signaling that investors expect economic deterioration.",
+    signal: "Recession signal",
+    signalIcon: "⚠️",
+    implications: ["Recession risk elevated", "Fed likely to cut rates", "Flight to long-term safety", "Credit tightening expected"],
+    points: [
+      { x: 0, y: 0.78 },
+      { x: 0.2, y: 0.68 },
+      { x: 0.45, y: 0.54 },
+      { x: 0.7, y: 0.40 },
+      { x: 1, y: 0.28 },
+    ],
+  },
+];
+
+const maturities = [
+  { label: "3M", pos: 0 },
+  { label: "2Y", pos: 0.25 },
+  { label: "5Y", pos: 0.5 },
+  { label: "10Y", pos: 0.75 },
+  { label: "30Y", pos: 1 },
+];
+
+const yieldLabels = [
+  { label: "High", pos: 0.85 },
+  { label: "Mid", pos: 0.5 },
+  { label: "Low", pos: 0.15 },
+];
+
+function smoothPath(points, chartX, chartY, chartW, chartH) {
+  const pts = points.map((p) => ({
+    x: chartX + p.x * chartW,
+    y: chartY + chartH - p.y * chartH,
+  }));
+
+  if (pts.length < 2) return "";
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const curr = pts[i];
+    const next = pts[i + 1];
+    const cpx = (curr.x + next.x) / 2;
+    d += ` C ${cpx} ${curr.y}, ${cpx} ${next.y}, ${next.x} ${next.y}`;
+  }
+  return d;
+}
+
+function getLabelEnd(points, chartX, chartY, chartW, chartH) {
+  const last = points[points.length - 1];
+  return {
+    x: chartX + last.x * chartW,
+    y: chartY + chartH - last.y * chartH,
+  };
+}
+
+export default function YieldCurveShapes() {
+  const [activeCurve, setActiveCurve] = useState(null);
+  const [animProgress, setAnimProgress] = useState(0);
+  const animRef = useRef(null);
+
+  useEffect(() => {
+    let start = null;
+    const duration = 1200;
+    const animate = (ts) => {
+      if (!start) start = ts;
+      const elapsed = ts - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setAnimProgress(eased);
+      if (progress < 1) animRef.current = requestAnimationFrame(animate);
+    };
+    animRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animRef.current);
+  }, []);
+
+  const svgW = 600;
+  const svgH = 380;
+  const chartX = 65;
+  const chartY = 30;
+  const chartW = 490;
+  const chartH = 280;
+  const chartBottom = chartY + chartH;
+
+  const active = activeCurve !== null ? curveTypes[activeCurve] : null;
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(160deg, #f8fafc 0%, #f1f5f9 40%, #e8edf3 100%)",
+        fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+      }}
+    >
+      <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+      />
+
+      <div style={{ maxWidth: 1020, width: "100%" }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <p
+            style={{
+              fontSize: "0.7rem",
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#94a3b8",
+              marginBottom: "0.5rem",
+            }}
+          >
+            Fixed Income Fundamentals
+          </p>
+          <h1
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: "2.4rem",
+              fontWeight: 700,
+              color: "#0f172a",
+              margin: 0,
+              lineHeight: 1.2,
+            }}
+          >
+            Yield Curve Shapes
+          </h1>
+          <p
+            style={{
+              color: "#64748b",
+              fontSize: "0.95rem",
+              marginTop: "0.6rem",
+              maxWidth: 540,
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            The relationship between bond maturities and their yields reveals powerful signals about economic expectations.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "2rem",
+            alignItems: "stretch",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          {/* Chart Card */}
+          <div
+            style={{
+              flex: "1 1 580px",
+              maxWidth: 640,
+              background: "white",
+              borderRadius: 20,
+              padding: "1.5rem 1.5rem 1rem",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)",
+              border: "1px solid #e2e8f0",
+            }}
+          >
+            <svg
+              viewBox={`0 0 ${svgW} ${svgH}`}
+              width="100%"
+              style={{ display: "block" }}
+            >
+              <defs>
+                {curveTypes.map((c, i) => (
+                  <linearGradient key={i} id={`area-${i}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={c.color} stopOpacity="0.12" />
+                    <stop offset="100%" stopColor={c.color} stopOpacity="0.01" />
+                  </linearGradient>
+                ))}
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Grid lines */}
+              {[0.15, 0.5, 0.85].map((v, i) => {
+                const y = chartY + chartH - v * chartH;
+                return (
+                  <line
+                    key={i}
+                    x1={chartX}
+                    y1={y}
+                    x2={chartX + chartW}
+                    y2={y}
+                    stroke="#e2e8f0"
+                    strokeWidth="1"
+                    strokeDasharray="4 6"
+                  />
+                );
+              })}
+
+              {/* Y-axis */}
+              <line
+                x1={chartX}
+                y1={chartY}
+                x2={chartX}
+                y2={chartBottom}
+                stroke="#cbd5e1"
+                strokeWidth="1.5"
+              />
+              {/* X-axis */}
+              <line
+                x1={chartX}
+                y1={chartBottom}
+                x2={chartX + chartW}
+                y2={chartBottom}
+                stroke="#cbd5e1"
+                strokeWidth="1.5"
+              />
+
+              {/* Y-axis labels */}
+              {yieldLabels.map((yl, i) => {
+                const y = chartY + chartH - yl.pos * chartH;
+                return (
+                  <text
+                    key={i}
+                    x={chartX - 12}
+                    y={y + 4}
+                    textAnchor="end"
+                    style={{
+                      fontSize: "0.7rem",
+                      fill: "#94a3b8",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {yl.label}
+                  </text>
+                );
+              })}
+
+              {/* Y-axis title */}
+              <text
+                x={12}
+                y={chartY + chartH / 2}
+                textAnchor="middle"
+                transform={`rotate(-90, 12, ${chartY + chartH / 2})`}
+                style={{
+                  fontSize: "0.65rem",
+                  fill: "#94a3b8",
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Yield
+              </text>
+
+              {/* X-axis labels */}
+              {maturities.map((m, i) => {
+                const x = chartX + m.pos * chartW;
+                return (
+                  <g key={i}>
+                    <line
+                      x1={x}
+                      y1={chartBottom}
+                      x2={x}
+                      y2={chartBottom + 6}
+                      stroke="#cbd5e1"
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={x}
+                      y={chartBottom + 22}
+                      textAnchor="middle"
+                      style={{
+                        fontSize: "0.72rem",
+                        fill: "#64748b",
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {m.label}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* X-axis title */}
+              <text
+                x={chartX + chartW / 2}
+                y={chartBottom + 42}
+                textAnchor="middle"
+                style={{
+                  fontSize: "0.65rem",
+                  fill: "#94a3b8",
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Maturity
+              </text>
+
+              {/* Area fills (only for active or all when none active) */}
+              {curveTypes.map((curve, i) => {
+                const isActive = activeCurve === i;
+                const noneActive = activeCurve === null;
+                if (!noneActive && !isActive) return null;
+
+                const path = smoothPath(curve.points, chartX, chartY, chartW, chartH);
+                const lastPt = curve.points[curve.points.length - 1];
+                const firstPt = curve.points[0];
+                const areaPath =
+                  path +
+                  ` L ${chartX + lastPt.x * chartW} ${chartBottom} L ${chartX + firstPt.x * chartW} ${chartBottom} Z`;
+
+                return (
+                  <path
+                    key={`area-${i}`}
+                    d={areaPath}
+                    fill={`url(#area-${i})`}
+                    opacity={isActive ? 0.8 : 0.3}
+                    style={{ transition: "opacity 0.4s ease" }}
+                  />
+                );
+              })}
+
+              {/* Curves */}
+              {curveTypes.map((curve, i) => {
+                const isActive = activeCurve === i;
+                const noneActive = activeCurve === null;
+                const dimmed = !noneActive && !isActive;
+                const path = smoothPath(curve.points, chartX, chartY, chartW, chartH);
+                const labelEnd = getLabelEnd(curve.points, chartX, chartY, chartW, chartH);
+
+                return (
+                  <g
+                    key={i}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setActiveCurve(activeCurve === i ? null : i)}
+                  >
+                    {/* Invisible wider hit area */}
+                    <path
+                      d={path}
+                      fill="none"
+                      stroke="transparent"
+                      strokeWidth="20"
+                    />
+                    {/* Glow effect for active */}
+                    {isActive && (
+                      <path
+                        d={path}
+                        fill="none"
+                        stroke={curve.color}
+                        strokeWidth="6"
+                        strokeOpacity="0.2"
+                        strokeLinecap="round"
+                        strokeDasharray={curve.dash ? "10 8" : "none"}
+                        pathLength="1"
+                        strokeDashoffset={curve.dash ? 0 : 1 - animProgress}
+                        style={{ filter: "blur(4px)" }}
+                      />
+                    )}
+                    {/* Main line */}
+                    <path
+                      d={path}
+                      fill="none"
+                      stroke={curve.color}
+                      strokeWidth={isActive ? 3.5 : 2.5}
+                      strokeLinecap="round"
+                      strokeDasharray={curve.dash ? "10 8" : `${chartW * 2}`}
+                      pathLength={curve.dash ? undefined : 1}
+                      strokeDashoffset={curve.dash ? 0 : 1 - animProgress}
+                      opacity={dimmed ? 0.18 : 1}
+                      style={{ transition: "opacity 0.4s ease, stroke-width 0.3s ease" }}
+                    />
+                    {/* End dot */}
+                    <circle
+                      cx={labelEnd.x}
+                      cy={labelEnd.y}
+                      r={isActive ? 5 : 4}
+                      fill={curve.color}
+                      opacity={dimmed ? 0.18 : animProgress}
+                      style={{ transition: "opacity 0.4s ease" }}
+                    />
+                    <circle
+                      cx={labelEnd.x}
+                      cy={labelEnd.y}
+                      r={isActive ? 8 : 0}
+                      fill="none"
+                      stroke={curve.color}
+                      strokeWidth="2"
+                      opacity={isActive ? 0.3 : 0}
+                      style={{ transition: "all 0.3s ease" }}
+                    />
+                    {/* Label at end */}
+                    <text
+                      x={labelEnd.x + 14}
+                      y={labelEnd.y + 5}
+                      style={{
+                        fontSize: isActive ? "0.85rem" : "0.78rem",
+                        fontWeight: 700,
+                        fill: curve.color,
+                        fontFamily: "'DM Sans', sans-serif",
+                        opacity: dimmed ? 0.2 : animProgress,
+                        transition: "opacity 0.4s ease, font-size 0.3s ease",
+                      }}
+                    >
+                      {curve.name}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* Intersection indicator */}
+              {activeCurve === null && (
+                <g opacity={animProgress * 0.6}>
+                  <circle
+                    cx={chartX + 0.37 * chartW}
+                    cy={chartY + chartH - 0.52 * chartH}
+                    r="12"
+                    fill="none"
+                    stroke="#94a3b8"
+                    strokeWidth="1"
+                    strokeDasharray="3 3"
+                  />
+                </g>
+              )}
+            </svg>
+
+            {/* Bottom legend */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "1.5rem",
+                paddingTop: "0.5rem",
+                borderTop: "1px solid #f1f5f9",
+                marginTop: "0.25rem",
+                flexWrap: "wrap",
+              }}
+            >
+              {curveTypes.map((curve, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveCurve(activeCurve === i ? null : i)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.4rem",
+                    padding: "0.45rem 0.85rem",
+                    borderRadius: 8,
+                    border: activeCurve === i ? `2px solid ${curve.color}` : "2px solid transparent",
+                    background: activeCurve === i ? curve.colorLight : "transparent",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 20,
+                      height: 3,
+                      borderRadius: 2,
+                      background: curve.color,
+                      display: "inline-block",
+                      borderTop: curve.dash ? `2px dashed ${curve.color}` : "none",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "0.78rem",
+                      fontWeight: 600,
+                      color: activeCurve === i ? curve.color : "#64748b",
+                    }}
+                  >
+                    {curve.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Detail Panel */}
+          <div
+            style={{
+              flex: "1 1 280px",
+              maxWidth: 340,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            {active ? (
+              <div
+                key={active.name}
+                style={{
+                  background: "white",
+                  borderRadius: 18,
+                  padding: "1.8rem",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+                  border: `1px solid ${active.color}18`,
+                  animation: "fadeSlideIn 0.35s ease",
+                }}
+              >
+                <style>{`
+                  @keyframes fadeSlideIn {
+                    from { opacity: 0; transform: translateY(12px); }
+                    to { opacity: 1; transform: translateY(0); }
+                  }
+                `}</style>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1rem" }}>
+                  <span
+                    style={{
+                      fontSize: "1.5rem",
+                      width: 44,
+                      height: 44,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: active.colorLight,
+                      borderRadius: 12,
+                    }}
+                  >
+                    {active.signalIcon}
+                  </span>
+                  <div>
+                    <h2
+                      style={{
+                        fontFamily: "'Playfair Display', Georgia, serif",
+                        fontSize: "1.5rem",
+                        fontWeight: 700,
+                        color: active.color,
+                        margin: 0,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {active.name}
+                    </h2>
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.12em",
+                        color: "#94a3b8",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {active.signal}
+                    </span>
+                  </div>
+                </div>
+
+                <p
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "#475569",
+                    lineHeight: 1.7,
+                    marginBottom: "1.3rem",
+                  }}
+                >
+                  {active.description}
+                </p>
+
+                <div>
+                  <p
+                    style={{
+                      fontSize: "0.65rem",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.15em",
+                      color: "#94a3b8",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    Implications
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                    {active.implications.map((imp, j) => (
+                      <div
+                        key={j}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          padding: "0.4rem 0.7rem",
+                          borderRadius: 10,
+                          background: `${active.color}08`,
+                          border: `1px solid ${active.color}15`,
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 5,
+                            height: 5,
+                            borderRadius: "50%",
+                            background: active.color,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontSize: "0.78rem",
+                            color: "#475569",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {imp}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  background: "white",
+                  borderRadius: 18,
+                  padding: "2rem",
+                  textAlign: "center",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+                  border: "1px solid #e2e8f0",
+                }}
+              >
+                <div style={{ fontSize: "2rem", marginBottom: "0.6rem", opacity: 0.5 }}>📐</div>
+                <p style={{ fontSize: "0.9rem", fontWeight: 600, color: "#334155", marginBottom: "0.3rem" }}>
+                  Select a curve
+                </p>
+                <p style={{ fontSize: "0.8rem", color: "#94a3b8", lineHeight: 1.6 }}>
+                  Click on any curve or use the legend below the chart to explore what each shape signals about the economy.
+                </p>
+
+                <div
+                  style={{
+                    marginTop: "1.2rem",
+                    padding: "0.8rem",
+                    borderRadius: 12,
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "0.65rem",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      color: "#94a3b8",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    Quick Reference
+                  </p>
+                  {curveTypes.map((c, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "0.3rem 0",
+                        borderTop: i > 0 ? "1px solid #e2e8f0" : "none",
+                      }}
+                    >
+                      <span style={{ fontSize: "0.78rem", fontWeight: 600, color: c.color }}>
+                        {c.signalIcon} {c.name}
+                      </span>
+                      <span style={{ fontSize: "0.72rem", color: "#64748b" }}>{c.signal}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

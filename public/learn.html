@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Macro Cycle Tracker — Learn</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'DM Sans', 'Segoe UI', sans-serif; }
+    .learn-heading { font-family: 'Playfair Display', Georgia, serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .section-overline {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    /* Cheat sheet accordion */
+    .cs-item {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .cs-item.open {
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.08);
+    }
+    .cs-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      background: white;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .cs-header:hover { background: #f8fafc; }
+    .cs-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .cs-title-group { flex: 1; text-align: left; }
+    .cs-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .cs-subtitle {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .cs-chevron {
+      width: 18px;
+      height: 18px;
+      color: #94a3b8;
+      flex-shrink: 0;
+      transition: transform 0.25s;
+    }
+    .cs-item.open .cs-chevron { transform: rotate(180deg); }
+    .cs-body {
+      display: none;
+      border-top: 1px solid #f1f5f9;
+      background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
+      min-height: 400px;
+      padding: 2rem;
+    }
+    .cs-item.open .cs-body { display: block; }
+    .cs-render-target { width: 100%; }
+
+    /* Placeholder while component loads */
+    .cs-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    /* Glossary */
+    .glossary-item { border-bottom: 1px solid #f1f5f9; }
+    .glossary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .glossary-header:hover { background: #f8fafc; }
+    .glossary-content { display: none; padding: 0 1.5rem 1rem; }
+    .glossary-content.open { display: block; }
+    .glossary-icon { transition: transform 0.2s; }
+    .glossary-header.open .glossary-icon { transform: rotate(180deg); }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeSlideIn 0.3s ease; }
+
+    /* In-page nav */
+    #learn-nav {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky;
+      top: 100px;
+      z-index: 30;
+      overflow-x: auto;
+    }
+    .learn-nav-link {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #64748b;
+      padding: 10px 16px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .learn-nav-link:hover { color: #0f172a; }
+    .learn-nav-link.active { color: var(--season-primary); border-bottom-color: var(--season-primary); font-weight: 600; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <header id="site-header" class="site-header text-white sticky top-0 z-50"></header>
+
+  <div id="season-key-bar" class="overflow-x-auto sticky top-14 z-40">
+    <div id="phase-pills" class="flex min-w-max px-2"></div>
+  </div>
+
+  <!-- In-page nav -->
+  <div id="learn-nav">
+    <div class="flex px-4">
+      <a href="#section-cheatsheets" class="learn-nav-link active">Cheat Sheets</a>
+      <a href="#section-indicators"  class="learn-nav-link">Indicators</a>
+      <a href="#section-phases"      class="learn-nav-link">8 Phases</a>
+      <a href="#section-allocations" class="learn-nav-link">Allocations</a>
+      <a href="#section-history"     class="learn-nav-link">History</a>
+      <a href="#section-glossary"    class="learn-nav-link">Glossary</a>
+    </div>
+  </div>
+
+  <main class="max-w-6xl mx-auto px-4 py-12 space-y-20">
+
+    <!-- Page Header -->
+    <div>
+      <p class="section-overline mb-3">Macro Education</p>
+      <h1 class="learn-heading text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
+        Market Cycle Fundamentals
+      </h1>
+      <p class="text-slate-500 mt-3 text-base max-w-2xl leading-relaxed">
+        Interactive guides to the economic seasons, macro indicators, and how to position a portfolio through each phase of the cycle.
+      </p>
+    </div>
+
+    <!-- ─── Cheat Sheets Accordion ─────────────────────────────────────────── -->
+    <section id="section-cheatsheets">
+      <p class="section-overline mb-3">Visual Cheat Sheets</p>
+      <h2 class="learn-heading text-2xl font-bold text-slate-900 mb-2">Core Frameworks</h2>
+      <p class="text-slate-500 mb-8 max-w-2xl">Click any topic to expand the interactive visualization.</p>
+
+      <div id="cheatsheets-accordion" class="space-y-3">
+
+        <!-- 1. Economic Cycle Wheel -->
+        <div class="cs-item" id="cs-cycle-wheel">
+          <button class="cs-header" onclick="toggleCheatSheet('cs-cycle-wheel', 'cycleWheel')">
+            <div class="cs-icon-wrap" style="background:#f0fdf4">🔄</div>
+            <div class="cs-title-group">
+              <div class="cs-title">Economic Cycle Wheel</div>
+              <div class="cs-subtitle">The 4 phases of expansion and contraction</div>
+            </div>
+            <svg class="cs-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="cs-body">
+            <div class="cs-render-target" id="cs-cycle-wheel-target">
+              <div class="cs-placeholder">Loading interactive component…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Yield Curve Shapes -->
+        <div class="cs-item" id="cs-yield-curve">
+          <button class="cs-header" onclick="toggleCheatSheet('cs-yield-curve', 'yieldCurve')">
+            <div class="cs-icon-wrap" style="background:#eff6ff">📐</div>
+            <div class="cs-title-group">
+              <div class="cs-title">Yield Curve Shapes</div>
+              <div class="cs-subtitle">Normal, flat, and inverted — what each signals</div>
+            </div>
+            <svg class="cs-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="cs-body">
+            <div class="cs-render-target" id="cs-yield-curve-target">
+              <div class="cs-placeholder">Loading interactive component…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. How Rates Flow -->
+        <div class="cs-item" id="cs-rate-flow">
+          <button class="cs-header" onclick="toggleCheatSheet('cs-rate-flow', 'rateFlow')">
+            <div class="cs-icon-wrap" style="background:#f0f9ff">🏦</div>
+            <div class="cs-title-group">
+              <div class="cs-title">How Rates Flow Through the Economy</div>
+              <div class="cs-subtitle">From Fed Funds to mortgages, stocks, and savings</div>
+            </div>
+            <svg class="cs-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="cs-body">
+            <div class="cs-render-target" id="cs-rate-flow-target">
+              <div class="cs-placeholder">Loading interactive component…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Dual Mandate -->
+        <div class="cs-item" id="cs-dual-mandate">
+          <button class="cs-header" onclick="toggleCheatSheet('cs-dual-mandate', 'dualMandate')">
+            <div class="cs-icon-wrap" style="background:#fff7ed">⚖️</div>
+            <div class="cs-title-group">
+              <div class="cs-title">The Fed's Dual Mandate</div>
+              <div class="cs-subtitle">Balancing maximum employment and price stability</div>
+            </div>
+            <svg class="cs-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="cs-body">
+            <div class="cs-render-target" id="cs-dual-mandate-target">
+              <div class="cs-placeholder">Loading interactive component…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Rate Cycle Timeline -->
+        <div class="cs-item" id="cs-rate-timeline">
+          <button class="cs-header" onclick="toggleCheatSheet('cs-rate-timeline', 'rateTimeline')">
+            <div class="cs-icon-wrap" style="background:#f8fafc">📈</div>
+            <div class="cs-title-group">
+              <div class="cs-title">Rate Cycle Timeline</div>
+              <div class="cs-subtitle">How interest rates move across the economic seasons</div>
+            </div>
+            <svg class="cs-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="cs-body">
+            <div class="cs-render-target" id="cs-rate-timeline-target">
+              <div class="cs-placeholder">Loading interactive component…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Credit Spread -->
+        <div class="cs-item" id="cs-credit-spread">
+          <button class="cs-header" onclick="toggleCheatSheet('cs-credit-spread', 'creditSpread')">
+            <div class="cs-icon-wrap" style="background:#fdf4ff">🎯</div>
+            <div class="cs-title-group">
+              <div class="cs-title">The Credit Spread</div>
+              <div class="cs-subtitle">How risk premiums signal market confidence</div>
+            </div>
+            <svg class="cs-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="cs-body">
+            <div class="cs-render-target" id="cs-credit-spread-target">
+              <div class="cs-placeholder">Loading interactive component…</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end accordion -->
+    </section>
+
+    <!-- ─── Indicator Explainers ──────────────────────────────────────────── -->
+    <section id="section-indicators">
+      <p class="section-overline mb-3">Reading the Data</p>
+      <h2 class="learn-heading text-2xl font-bold text-slate-900 mb-2">How to Read Macro Indicators</h2>
+      <p class="text-slate-500 mb-8 max-w-2xl">Six key data series that define the economic season — what they measure and what they signal.</p>
+      <div id="indicators-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- ─── 8 Phases ──────────────────────────────────────────────────────── -->
+    <section id="section-phases">
+      <p class="section-overline mb-3">Deep Dives</p>
+      <h2 class="learn-heading text-2xl font-bold text-slate-900 mb-2">The 8 Economic Phases</h2>
+      <p class="text-slate-500 mb-8 max-w-2xl">Each season has two sub-phases. Knowing which one you're in changes the investment playbook significantly.</p>
+      <div id="phases-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- ─── Allocations ───────────────────────────────────────────────────── -->
+    <section id="section-allocations">
+      <p class="section-overline mb-3">Portfolio Strategy</p>
+      <h2 class="learn-heading text-2xl font-bold text-slate-900 mb-2">Allocation by Phase</h2>
+      <p class="text-slate-500 mb-8 max-w-2xl">How the model portfolio shifts between equities, bonds, cash, and alternatives through the cycle.</p>
+      <div id="allocations-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- ─── Historical Examples ───────────────────────────────────────────── -->
+    <section id="section-history">
+      <p class="section-overline mb-3">Case Studies</p>
+      <h2 class="learn-heading text-2xl font-bold text-slate-900 mb-2">Historical Cycle Examples</h2>
+      <p class="text-slate-500 mb-8 max-w-2xl">How the four seasons played out in major historical episodes and what each one taught investors.</p>
+      <div id="history-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- ─── Glossary ──────────────────────────────────────────────────────── -->
+    <section id="section-glossary">
+      <p class="section-overline mb-3">Reference</p>
+      <h2 class="learn-heading text-2xl font-bold text-slate-900 mb-2">Economic Glossary</h2>
+      <p class="text-slate-500 mb-8">Click any term to expand the definition and plain-English analogy.</p>
+      <div id="glossary-container" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden divide-y divide-slate-100">
+        <div class="p-6 text-slate-400 text-sm text-center">Loading terms…</div>
+      </div>
+    </section>
+
+    <div class="disclaimer text-xs">
+      <strong>Disclaimer:</strong> Not financial advice. Historical patterns from public educational resources. Past performance does not guarantee future results. Consult a registered financial advisor before making investment decisions. Educational purposes only.
+    </div>
+
+  </main>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/learn.js"></script>
+</body>
+</html>

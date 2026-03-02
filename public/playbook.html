@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Macro Cycle Tracker — Playbook</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen">
+
+  <header id="site-header" class="site-header text-white shadow-lg sticky top-0 z-50"></header>
+
+  <div id="season-key-bar" class="overflow-x-auto sticky top-14 z-40">
+    <div id="phase-pills" class="flex min-w-max px-2"></div>
+  </div>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Current Portfolio Header -->
+    <div id="portfolio-header" class="season-card p-6 rounded-xl">
+      <div class="loading-shimmer h-6 w-48 rounded mb-4"></div>
+      <div class="loading-shimmer h-4 w-full rounded"></div>
+    </div>
+
+    <!-- Allocation + Actions Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Donut Chart -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col items-center">
+        <h2 class="font-bold text-gray-700 mb-4 self-start flex items-center gap-2">
+          <span>🥧</span> Allocation
+        </h2>
+        <canvas id="donut-canvas" width="200" height="200"></canvas>
+        <div id="donut-legend" class="mt-4 w-full space-y-2 text-sm"></div>
+        <div id="bond-duration" class="mt-4 w-full pt-4 border-t border-gray-100">
+          <div class="text-xs text-gray-500 mb-1">Bond Duration</div>
+          <div id="duration-text" class="text-sm font-medium text-gray-700"></div>
+        </div>
+      </div>
+
+      <!-- Buy / Hold / Sell -->
+      <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Buy -->
+        <div class="action-buy rounded-xl p-4">
+          <h3 class="font-bold text-green-800 mb-3 flex items-center gap-2">
+            <span>📈</span> BUY
+          </h3>
+          <div id="actions-buy" class="space-y-2"></div>
+        </div>
+        <!-- Hold -->
+        <div class="action-hold rounded-xl p-4">
+          <h3 class="font-bold text-amber-700 mb-3 flex items-center gap-2">
+            <span>⏸️</span> HOLD
+          </h3>
+          <div id="actions-hold" class="space-y-2"></div>
+        </div>
+        <!-- Sell -->
+        <div class="action-sell rounded-xl p-4">
+          <h3 class="font-bold text-red-700 mb-3 flex items-center gap-2">
+            <span>📉</span> SELL
+          </h3>
+          <div id="actions-sell" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sector Breakdown -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+      <h2 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <span>🏭</span> Sector Positioning
+      </h2>
+      <div id="sector-breakdown" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+    </div>
+
+    <!-- Bond Detail -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+      <h2 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <span>🏛️</span> Bond Allocation Detail
+      </h2>
+      <div id="bond-detail" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+      <div id="equity-style" class="mt-4 pt-4 border-t border-gray-100 text-sm text-gray-600"></div>
+    </div>
+
+    <!-- Setup Overlays -->
+    <div id="overlays-section" class="bg-amber-50 rounded-xl border border-amber-200 p-5 hidden">
+      <h2 class="font-bold text-amber-800 mb-3 flex items-center gap-2">
+        <span>⚠️</span> Active Overlays
+      </h2>
+      <div id="overlays-list" class="space-y-2"></div>
+    </div>
+
+    <!-- Watch List -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+      <h2 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
+        <span>👁️</span> Watch List
+      </h2>
+      <div id="watch-list" class="flex flex-wrap gap-2"></div>
+    </div>
+
+    <!-- All 8 Phases Accordion -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-5 border-b border-gray-100">
+        <h2 class="font-bold text-gray-700 flex items-center gap-2">
+          <span>📋</span> All 8 Phases Reference
+        </h2>
+      </div>
+      <div id="phases-accordion" class="divide-y divide-gray-100"></div>
+    </div>
+
+    <!-- Historical Analog + Risk -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <h2 class="font-bold text-gray-700 mb-3">📚 Historical Analog</h2>
+        <div id="historical-analog" class="text-gray-600 text-sm leading-relaxed"></div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <h2 class="font-bold text-gray-700 mb-3">⚖️ Risk Level</h2>
+        <div id="risk-level" class="text-gray-600"></div>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <strong>⚠️ Disclaimer:</strong> Not financial advice. Historical patterns from public educational resources. Past performance ≠ future results. Do your own research. Consult a registered financial advisor before making investment decisions. This tool is for educational purposes only.
+    </div>
+
+  </main>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/playbook.js"></script>
+</body>
+</html>

@@ -1,0 +1,793 @@
+import { useState, useEffect } from "react";
+
+const phases = [
+  {
+    id: "spring",
+    name: "Spring",
+    subtitle: "Cutting",
+    icon: "🌱",
+    color: "#10b981",
+    colorDark: "#059669",
+    colorLight: "#d1fae5",
+    rateLabel: "Rates falling",
+    x: 0.08,
+    y: 0.72,
+    detail: {
+      description:
+        "The Fed cuts rates aggressively to stimulate a slowing or recessionary economy. Borrowing becomes cheaper across the board, laying the groundwork for recovery.",
+      rateAction: "Cutting rates",
+      rateRange: "Heading toward cycle lows",
+      environment: ["Economy weakening or in recession", "Unemployment rising", "Inflation falling or low", "Risk aversion high"],
+      strategy: ["Lock in long-term bonds at high yields", "Accumulate equities at depressed prices", "Extend fixed-rate debt duration", "Overweight growth-sensitive sectors"],
+    },
+  },
+  {
+    id: "summer",
+    name: "Summer",
+    subtitle: "Peak Low",
+    icon: "☀️",
+    color: "#eab308",
+    colorDark: "#ca8a04",
+    colorLight: "#fef9c3",
+    rateLabel: "Rates at floor",
+    x: 0.35,
+    y: 0.15,
+    detail: {
+      description:
+        "Rates reach their cycle bottom. Accommodative policy fuels recovery — credit flows freely, asset prices rise, and confidence rebuilds. The economy begins to accelerate.",
+      rateAction: "Holding at lows",
+      rateRange: "Near zero or cycle floor",
+      environment: ["Early expansion phase", "Easy monetary conditions", "Credit flowing freely", "Asset prices rising sharply"],
+      strategy: ["Maximize equity exposure", "Favor cyclical over defensive", "Use low rates to refinance debt", "Real estate becomes attractive"],
+    },
+  },
+  {
+    id: "autumn",
+    name: "Autumn",
+    subtitle: "Hiking",
+    icon: "🍂",
+    color: "#f97316",
+    colorDark: "#ea580c",
+    colorLight: "#ffedd5",
+    rateLabel: "Rates rising",
+    x: 0.6,
+    y: 0.42,
+    detail: {
+      description:
+        "The Fed begins raising rates to prevent the economy from overheating. Growth is strong but inflation is building. The tightening cycle puts pressure on rate-sensitive assets.",
+      rateAction: "Hiking rates",
+      rateRange: "Moving through neutral",
+      environment: ["Strong GDP growth", "Inflation accelerating", "Full or near-full employment", "Fed turning hawkish"],
+      strategy: ["Reduce duration in bond portfolios", "Shift to value and quality stocks", "Floating-rate debt becomes expensive", "Cash and short-term bonds gain appeal"],
+    },
+  },
+  {
+    id: "winter",
+    name: "Winter",
+    subtitle: "Peak High",
+    icon: "❄️",
+    color: "#3b82f6",
+    colorDark: "#2563eb",
+    colorLight: "#dbeafe",
+    rateLabel: "Rates at ceiling",
+    x: 0.82,
+    y: 0.62,
+    detail: {
+      description:
+        "Rates reach their cycle peak. Tight policy has cooled inflation but economic momentum is fading. The market begins pricing in future cuts as cracks appear in the economy.",
+      rateAction: "Holding at highs",
+      rateRange: "Restrictive territory",
+      environment: ["Growth decelerating", "Inflation easing from peaks", "Credit conditions tightening", "Yield curve likely inverted"],
+      strategy: ["Lock in high yields on long bonds", "Defensive equity positioning", "Prepare for rate-cut beneficiaries", "Watch for credit stress signals"],
+    },
+  },
+];
+
+const neutralRate = 0.47;
+
+export default function RateCycleTimeline() {
+  const [activePhase, setActivePhase] = useState(null);
+  const [animProgress, setAnimProgress] = useState(0);
+  const [hoveredPhase, setHoveredPhase] = useState(null);
+
+  useEffect(() => {
+    let start = null;
+    const duration = 1500;
+    const animate = (ts) => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      setAnimProgress(1 - Math.pow(1 - p, 3));
+      if (p < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, []);
+
+  const active = activePhase !== null ? phases[activePhase] : null;
+
+  const svgW = 600;
+  const svgH = 340;
+  const chartX = 50;
+  const chartY = 40;
+  const chartW = 510;
+  const chartH = 240;
+
+  const toSvg = (px, py) => ({
+    x: chartX + px * chartW,
+    y: chartY + chartH - py * chartH,
+  });
+
+  // Build the rate curve path through phase points plus extensions
+  const curvePoints = [
+    { x: 0, y: 0.72 },        // pre-spring flat
+    { x: 0.08, y: 0.72 },     // spring
+    { x: 0.22, y: 0.40 },     // rise
+    { x: 0.35, y: 0.15 },     // summer (peak low rate = high on chart since inverted)
+    // Wait — the original chart shows rates on Y axis where LOW is bottom. Spring=low rates (bottom), Summer=peak low (top means low rates?)
+    // Actually looking at the image: Spring is at bottom-left (cutting = low rates), Summer is at top (peak low = rates are at their lowest, shown high because "peak low" is the peak of economic stimulus). 
+    // Let me re-read: the Y axis seems to represent rate LEVEL inverted or... 
+    // Actually the chart shows: Spring (bottom) = rates low/cutting, Summer (top) = peak low rates (lowest point), then it goes DOWN to Autumn (hiking) and Winter (peak high).
+    // So Y axis is INVERTED: top = low rates, bottom = high rates. The neutral line is in the middle.
+    // Let me redo with y representing position on chart (1=top, 0=bottom):
+  ];
+
+  // Redefine: y=1 means top of chart (low rates), y=0 means bottom (high rates)
+  // Spring: rates being cut → approaching low → positioned low-ish on chart but rising toward summer
+  // Summer: peak low rates → top of chart
+  // Autumn: hiking → middle
+  // Winter: peak high → bottom-ish
+
+  const pathPoints = [
+    { px: -0.02, py: 0.28 },   // entry (rates still somewhat high, coming from winter)
+    { px: 0.08, py: 0.28 },    // spring: cutting (rates moderate-high, starting to fall)
+    { px: 0.22, py: 0.65 },    // transition up
+    { px: 0.35, py: 0.85 },    // summer: peak low rates (top of chart)
+    { px: 0.48, py: 0.72 },    // plateau
+    { px: 0.60, py: 0.55 },    // autumn: hiking (rates rising = moving down)
+    { px: 0.72, py: 0.42 },    // transition
+    { px: 0.82, py: 0.32 },    // winter: peak high rates (near bottom)
+    { px: 0.95, py: 0.28 },    // exit (heading back to spring)
+    { px: 1.02, py: 0.28 },    // off-screen
+  ];
+
+  const svgPoints = pathPoints.map((p) => toSvg(p.px, p.py));
+
+  let pathD = `M ${svgPoints[0].x} ${svgPoints[0].y}`;
+  for (let i = 0; i < svgPoints.length - 1; i++) {
+    const curr = svgPoints[i];
+    const next = svgPoints[i + 1];
+    const cpx = (curr.x + next.x) / 2;
+    pathD += ` C ${cpx} ${curr.y}, ${cpx} ${next.y}, ${next.x} ${next.y}`;
+  }
+
+  const phasePositions = phases.map((p) => toSvg(p.x, 1 - p.y));
+  // Recalculate: for each phase, y in the phases array represents how HIGH on the chart
+  // Spring y=0.72 means rates are high? No...
+  // Let me just manually place them to match the original image layout
+  const phaseCoords = [
+    toSvg(0.08, 0.28),  // Spring: bottom-left (low on chart = low rates being cut)
+    toSvg(0.35, 0.85),  // Summer: top (peak low = rates at their lowest)
+    toSvg(0.60, 0.55),  // Autumn: middle (hiking through neutral)
+    toSvg(0.82, 0.32),  // Winter: lower-right (peak high rates)
+  ];
+
+  const neutralY = chartY + chartH - neutralRate * chartH;
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(160deg, #f8fafc 0%, #f1f5f9 40%, #e8edf3 100%)",
+        fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+      }}
+    >
+      <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+      />
+      <style>{`
+        @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes dotPulse {
+          0%, 100% { r: 7; }
+          50% { r: 10; }
+        }
+      `}</style>
+
+      <div style={{ maxWidth: 1020, width: "100%" }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <p
+            style={{
+              fontSize: "0.7rem",
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#94a3b8",
+              marginBottom: "0.5rem",
+            }}
+          >
+            Interest Rate Dynamics
+          </p>
+          <h1
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: "2.4rem",
+              fontWeight: 700,
+              color: "#0f172a",
+              margin: 0,
+              lineHeight: 1.2,
+            }}
+          >
+            Rate Cycle Timeline
+          </h1>
+          <p
+            style={{
+              color: "#64748b",
+              fontSize: "0.95rem",
+              marginTop: "0.6rem",
+              maxWidth: 520,
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            Interest rates cycle between peaks and troughs as the Fed responds to shifting economic conditions.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "2.5rem",
+            alignItems: "center",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Chart */}
+          <div style={{ flex: "1 1 580px", maxWidth: 640 }}>
+            <div
+              style={{
+                background: "white",
+                borderRadius: 24,
+                padding: "1.5rem 1.5rem 1rem",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)",
+                border: "1px solid #e2e8f0",
+              }}
+            >
+              <svg viewBox={`0 0 ${svgW} ${svgH}`} width="100%" style={{ display: "block", overflow: "visible" }}>
+                <defs>
+                  <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="30%" stopColor="#eab308" />
+                    <stop offset="60%" stopColor="#f97316" />
+                    <stop offset="100%" stopColor="#3b82f6" />
+                  </linearGradient>
+                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.08" />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.01" />
+                  </linearGradient>
+                  <filter id="dotGlow">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <clipPath id="chartClip">
+                    <rect x={chartX} y={chartY - 10} width={chartW} height={chartH + 20} />
+                  </clipPath>
+                </defs>
+
+                {/* Y-axis */}
+                <line x1={chartX} y1={chartY} x2={chartX} y2={chartY + chartH} stroke="#e2e8f0" strokeWidth="1" />
+
+                {/* Y labels */}
+                <text x={chartX - 8} y={chartY + 12} textAnchor="end" style={{ fontSize: "0.65rem", fill: "#94a3b8", fontFamily: "'DM Sans'" }}>
+                  Low
+                </text>
+                <text x={chartX - 8} y={chartY + chartH - 4} textAnchor="end" style={{ fontSize: "0.65rem", fill: "#94a3b8", fontFamily: "'DM Sans'" }}>
+                  High
+                </text>
+                {/* Y-axis title */}
+                <text
+                  x={14}
+                  y={chartY + chartH / 2}
+                  textAnchor="middle"
+                  transform={`rotate(-90, 14, ${chartY + chartH / 2})`}
+                  style={{
+                    fontSize: "0.6rem",
+                    fill: "#94a3b8",
+                    fontFamily: "'DM Sans'",
+                    fontWeight: 600,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Fed Funds Rate
+                </text>
+
+                {/* Subtle horizontal grid */}
+                {[0.25, 0.5, 0.75].map((v, i) => {
+                  const y = chartY + chartH - v * chartH;
+                  return (
+                    <line key={i} x1={chartX} y1={y} x2={chartX + chartW} y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                  );
+                })}
+
+                {/* Neutral rate line */}
+                <line
+                  x1={chartX}
+                  y1={neutralY}
+                  x2={chartX + chartW}
+                  y2={neutralY}
+                  stroke="#94a3b8"
+                  strokeWidth="1.5"
+                  strokeDasharray="6 5"
+                  opacity="0.5"
+                />
+                <g>
+                  <rect
+                    x={chartX + chartW + 6}
+                    y={neutralY - 14}
+                    width={52}
+                    height={22}
+                    rx={6}
+                    fill="#f1f5f9"
+                    stroke="#e2e8f0"
+                    strokeWidth="1"
+                  />
+                  <text
+                    x={chartX + chartW + 32}
+                    y={neutralY - 6}
+                    textAnchor="middle"
+                    style={{
+                      fontSize: "0.5rem",
+                      fill: "#94a3b8",
+                      fontFamily: "'DM Sans'",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    Neutral
+                  </text>
+                  <text
+                    x={chartX + chartW + 32}
+                    y={neutralY + 4}
+                    textAnchor="middle"
+                    style={{
+                      fontSize: "0.6rem",
+                      fill: "#64748b",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontWeight: 500,
+                    }}
+                  >
+                    ~2.5%
+                  </text>
+                </g>
+
+                {/* Area under curve */}
+                <g clipPath="url(#chartClip)">
+                  <path
+                    d={pathD + ` L ${svgPoints[svgPoints.length - 1].x} ${chartY + chartH} L ${svgPoints[0].x} ${chartY + chartH} Z`}
+                    fill="url(#areaGrad)"
+                    opacity={animProgress}
+                  />
+                </g>
+
+                {/* Main curve */}
+                <g clipPath="url(#chartClip)">
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke="url(#lineGrad)"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    pathLength="1"
+                    strokeDasharray="1"
+                    strokeDashoffset={1 - animProgress}
+                    style={{ transition: "stroke-dashoffset 0.05s linear" }}
+                  />
+                  {/* Glow line */}
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke="url(#lineGrad)"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    opacity="0.1"
+                    pathLength="1"
+                    strokeDasharray="1"
+                    strokeDashoffset={1 - animProgress}
+                  />
+                </g>
+
+                {/* Phase dots and labels */}
+                {phases.map((phase, i) => {
+                  const pos = phaseCoords[i];
+                  const isActive = activePhase === i;
+                  const isHovered = hoveredPhase === i;
+                  const isDimmed = activePhase !== null && !isActive;
+                  const labelAbove = i === 1; // Summer label above
+                  const labelBelow = i === 0 || i === 3; // Spring and Winter below
+                  const labelYOffset = labelAbove ? -18 : labelBelow ? 22 : -18;
+                  const subtitleYOffset = labelAbove ? -5 : labelBelow ? 35 : -5;
+
+                  return (
+                    <g
+                      key={phase.id}
+                      style={{
+                        cursor: "pointer",
+                        opacity: isDimmed ? 0.25 : animProgress,
+                        transition: "opacity 0.4s ease",
+                      }}
+                      onClick={() => setActivePhase(activePhase === i ? null : i)}
+                      onMouseEnter={() => setHoveredPhase(i)}
+                      onMouseLeave={() => setHoveredPhase(null)}
+                    >
+                      {/* Outer ring */}
+                      {(isActive || isHovered) && (
+                        <circle
+                          cx={pos.x}
+                          cy={pos.y}
+                          r="14"
+                          fill="none"
+                          stroke={phase.color}
+                          strokeWidth="2"
+                          opacity={isActive ? 0.4 : 0.2}
+                          style={isActive ? { animation: "dotPulse 2s ease infinite" } : {}}
+                        />
+                      )}
+                      {/* Dot */}
+                      <circle
+                        cx={pos.x}
+                        cy={pos.y}
+                        r={isActive ? 8 : isHovered ? 7 : 6}
+                        fill={phase.color}
+                        stroke="white"
+                        strokeWidth="3"
+                        filter={isActive ? "url(#dotGlow)" : undefined}
+                        style={{ transition: "r 0.3s ease" }}
+                      />
+
+                      {/* Label bg pill */}
+                      <rect
+                        x={pos.x - 52}
+                        y={pos.y + labelYOffset - 16}
+                        width={104}
+                        height={46}
+                        rx={12}
+                        fill="white"
+                        fillOpacity={isActive || isHovered ? 0.95 : 0.75}
+                        stroke={isActive ? phase.color : "transparent"}
+                        strokeWidth="1.5"
+                        style={{ transition: "all 0.3s ease" }}
+                      />
+
+                      {/* Phase name */}
+                      <text
+                        x={pos.x}
+                        y={pos.y + labelYOffset + 4}
+                        textAnchor="middle"
+                        style={{
+                          fontSize: "0.82rem",
+                          fontWeight: 700,
+                          fill: phase.colorDark,
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}
+                      >
+                        {phase.icon} {phase.name}
+                      </text>
+                      {/* Subtitle */}
+                      <text
+                        x={pos.x}
+                        y={pos.y + subtitleYOffset + 12}
+                        textAnchor="middle"
+                        style={{
+                          fontSize: "0.6rem",
+                          fontWeight: 500,
+                          fill: phase.color,
+                          fontFamily: "'DM Sans', sans-serif",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                        }}
+                      >
+                        {phase.subtitle}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Directional arrows along the curve */}
+                {[0.18, 0.48, 0.72].map((t, i) => {
+                  // Approximate position along the curve
+                  const idx = Math.floor(t * (pathPoints.length - 1));
+                  const frac = t * (pathPoints.length - 1) - idx;
+                  const p1 = pathPoints[Math.min(idx, pathPoints.length - 1)];
+                  const p2 = pathPoints[Math.min(idx + 1, pathPoints.length - 1)];
+                  const px = p1.px + (p2.px - p1.px) * frac;
+                  const py = p1.py + (p2.py - p1.py) * frac;
+                  const pos = toSvg(px, py);
+                  const dx = (p2.px - p1.px);
+                  const dy = -(p2.py - p1.py);
+                  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+                  return (
+                    <g
+                      key={i}
+                      transform={`translate(${pos.x}, ${pos.y}) rotate(${angle})`}
+                      opacity={animProgress * 0.35}
+                    >
+                      <path d="M -5 -4 L 3 0 L -5 4" fill="none" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {/* Phase buttons */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  marginTop: "0.5rem",
+                  paddingTop: "0.75rem",
+                  borderTop: "1px solid #f1f5f9",
+                  flexWrap: "wrap",
+                }}
+              >
+                {phases.map((phase, i) => (
+                  <button
+                    key={phase.id}
+                    onClick={() => setActivePhase(activePhase === i ? null : i)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      padding: "0.4rem 0.75rem",
+                      borderRadius: 8,
+                      border: activePhase === i ? `2px solid ${phase.color}` : "2px solid transparent",
+                      background: activePhase === i ? phase.colorLight : "transparent",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <span style={{ fontSize: "0.75rem" }}>{phase.icon}</span>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: activePhase === i ? phase.colorDark : "#64748b",
+                      }}
+                    >
+                      {phase.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Bottom tagline */}
+              <p
+                style={{
+                  textAlign: "center",
+                  fontSize: "0.72rem",
+                  color: "#94a3b8",
+                  fontStyle: "italic",
+                  marginTop: "0.6rem",
+                }}
+              >
+                Rates cycle between low (spring) and high (winter)
+              </p>
+            </div>
+          </div>
+
+          {/* Detail Panel */}
+          <div
+            style={{
+              flex: "1 1 280px",
+              maxWidth: 340,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            {active ? (
+              <div
+                key={active.id}
+                style={{
+                  background: "white",
+                  borderRadius: 18,
+                  padding: "1.8rem",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+                  border: `1px solid ${active.color}18`,
+                  animation: "fadeSlideIn 0.35s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1rem" }}>
+                  <span
+                    style={{
+                      fontSize: "1.4rem",
+                      width: 44,
+                      height: 44,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: active.colorLight,
+                      borderRadius: 12,
+                    }}
+                  >
+                    {active.icon}
+                  </span>
+                  <div>
+                    <h2
+                      style={{
+                        fontFamily: "'Playfair Display', Georgia, serif",
+                        fontSize: "1.4rem",
+                        fontWeight: 700,
+                        color: active.color,
+                        margin: 0,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {active.name}
+                    </h2>
+                    <div style={{ display: "flex", gap: "0.4rem", marginTop: "0.2rem" }}>
+                      <span
+                        style={{
+                          fontSize: "0.62rem",
+                          fontFamily: "'JetBrains Mono', monospace",
+                          color: active.colorDark,
+                          fontWeight: 500,
+                          background: active.colorLight,
+                          padding: "0.1rem 0.4rem",
+                          borderRadius: 5,
+                        }}
+                      >
+                        {active.detail.rateAction}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: "0.83rem", color: "#475569", lineHeight: 1.7, marginBottom: "0.8rem" }}>
+                  {active.detail.description}
+                </p>
+
+                {/* Rate range */}
+                <div
+                  style={{
+                    background: `${active.color}08`,
+                    border: `1px solid ${active.color}15`,
+                    borderRadius: 10,
+                    padding: "0.5rem 0.7rem",
+                    marginBottom: "0.8rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <span style={{ fontSize: "0.85rem" }}>📍</span>
+                  <div>
+                    <span style={{ fontSize: "0.62rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: active.color }}>
+                      Rate Position
+                    </span>
+                    <div style={{ fontSize: "0.78rem", color: "#475569", fontWeight: 500 }}>
+                      {active.detail.rateRange}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Environment */}
+                <div style={{ marginBottom: "0.8rem" }}>
+                  <p style={{ fontSize: "0.63rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "#94a3b8", marginBottom: "0.4rem" }}>
+                    Environment
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+                    {active.detail.environment.map((e, j) => (
+                      <span
+                        key={j}
+                        style={{
+                          padding: "0.25rem 0.55rem",
+                          borderRadius: 20,
+                          fontSize: "0.68rem",
+                          fontWeight: 500,
+                          background: active.colorLight,
+                          color: active.colorDark,
+                          border: `1px solid ${active.color}25`,
+                        }}
+                      >
+                        {e}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Strategy */}
+                <div>
+                  <p style={{ fontSize: "0.63rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "#94a3b8", marginBottom: "0.4rem" }}>
+                    Strategy Playbook
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    {active.detail.strategy.map((s, j) => (
+                      <div
+                        key={j}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.45rem",
+                          padding: "0.3rem 0.6rem",
+                          borderRadius: 8,
+                          background: "#f8fafc",
+                          border: "1px solid #e2e8f0",
+                        }}
+                      >
+                        <span style={{ width: 4, height: 4, borderRadius: "50%", background: active.color, flexShrink: 0 }} />
+                        <span style={{ fontSize: "0.74rem", color: "#475569", fontWeight: 500 }}>{s}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  background: "white",
+                  borderRadius: 18,
+                  padding: "2rem",
+                  textAlign: "center",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.06)",
+                  border: "1px solid #e2e8f0",
+                }}
+              >
+                <div style={{ fontSize: "2rem", marginBottom: "0.6rem", opacity: 0.5 }}>📈</div>
+                <p style={{ fontSize: "0.9rem", fontWeight: 600, color: "#334155", marginBottom: "0.3rem" }}>
+                  Explore each phase
+                </p>
+                <p style={{ fontSize: "0.8rem", color: "#94a3b8", lineHeight: 1.6, marginBottom: "1.2rem" }}>
+                  Click on any point along the rate cycle to see the economic environment and investment strategy for that phase.
+                </p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                  {phases.map((p, i) => (
+                    <div
+                      key={p.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.6rem",
+                        padding: "0.5rem 0.7rem",
+                        borderRadius: 10,
+                        background: p.colorLight,
+                        border: `1px solid ${p.color}20`,
+                        textAlign: "left",
+                      }}
+                    >
+                      <span style={{ fontSize: "1rem", flexShrink: 0 }}>{p.icon}</span>
+                      <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: "0.78rem", fontWeight: 700, color: p.colorDark }}>
+                          {p.name}
+                        </span>
+                        <span style={{ fontSize: "0.7rem", color: "#64748b", marginLeft: "0.4rem" }}>
+                          {p.subtitle}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: "0.68rem", color: "#94a3b8" }}>
+                        {i === 0 ? "→" : i === 1 ? "↗" : i === 2 ? "↘" : "→"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
