@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' style='background:transparent'><text y='.9em' font-size='90'>📊</text></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Macro Cycle Tracker — Charts</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -10,6 +11,34 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body class="min-h-screen">
+
+    <!-- Live Ticker Tape -->
+  <div class="ticker-bar">
+    <div class="tradingview-widget-container" style="height:46px">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+      {
+        "symbols": [
+          {"proName":"FOREXCOM:SPXUSD","title":"S\u0026P 500"},
+          {"proName":"DJ:DJI","title":"Dow Jones"},
+          {"proName":"FOREXCOM:NSXUSD","title":"NASDAQ 100"},
+          {"proName":"BITSTAMP:BTCUSD","title":"Bitcoin"},
+          {"proName":"BITSTAMP:ETHUSD","title":"Ethereum"},
+          {"proName":"COINBASE:SOLUSD","title":"Solana"},
+          {"proName":"TVC:GOLD","title":"Gold"},
+          {"proName":"TVC:US10Y","title":"10Y Yield"},
+          {"proName":"ECONOMICS:USINTR","title":"Fed Rate"},
+          {"proName":"FOREXCOM:DXY","title":"US Dollar"}
+        ],
+        "showSymbolLogo": true,
+        "isTransparent": false,
+        "displayMode": "adaptive",
+        "colorTheme": "dark",
+        "locale": "en"
+      }
+      </script>
+    </div>
+  </div>
 
   <header id="site-header" class="site-header text-white shadow-lg sticky top-0 z-50"></header>
 

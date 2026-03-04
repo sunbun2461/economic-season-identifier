@@ -78,17 +78,17 @@ function renderRatesGrid(snapshot) {
 
   const { rates } = snapshot;
   const cards = [
-    { label: 'Fed Funds', series: rates.fedFunds, suffix: '%' },
-    { label: '2Y Treasury', series: rates.dgs2, suffix: '%' },
-    { label: '10Y Treasury', series: rates.dgs10, suffix: '%' },
-    { label: '30Y Treasury', series: rates.dgs30, suffix: '%' },
-    { label: '10Y-2Y Spread', series: rates.t10y2y, suffix: '%', highlight: true },
-    { label: 'Mortgage 30Y', series: rates.mortgage30, suffix: '%' },
-    { label: 'HY Spread', series: snapshot.credit.hySpread, suffix: '%' },
-    { label: 'Fed Balance Sheet', series: snapshot.credit.walcl, largeNum: true },
+    { label: 'Fed Funds', note: 'FOMC target rate', series: rates.fedFunds, suffix: '%' },
+    { label: '2Y Treasury', note: 'Near-term rate expectations', series: rates.dgs2, suffix: '%' },
+    { label: '10Y Treasury', note: 'Long-term growth outlook', series: rates.dgs10, suffix: '%' },
+    { label: '30Y Treasury', note: 'Mortgage & pension benchmark', series: rates.dgs30, suffix: '%' },
+    { label: '10Y-2Y Spread', note: 'Negative = inverted = recession risk', series: rates.t10y2y, suffix: '%', highlight: true },
+    { label: 'Mortgage 30Y', note: 'Average 30-year home loan rate', series: rates.mortgage30, suffix: '%' },
+    { label: 'HY Spread', note: 'Junk bond premium — >5% = stress', series: snapshot.credit.hySpread, suffix: '%' },
+    { label: 'Fed Balance Sheet', note: 'QE = rising (stimulus) / QT = falling', series: snapshot.credit.walcl, largeNum: true },
   ];
 
-  grid.innerHTML = cards.map(({ label, series, suffix, largeNum, highlight }) => {
+  grid.innerHTML = cards.map(({ label, note, series, suffix, largeNum, highlight }) => {
     const val = series.latest;
     const displayVal = largeNum ? fmtT(val) : (val !== null ? val.toFixed(2) + (suffix || '') : 'N/A');
     const arrow = trendArrow(series.trend);
@@ -97,9 +97,10 @@ function renderRatesGrid(snapshot) {
     const isNegative = val !== null && val < 0 && !largeNum;
     const valueColor = isNegative ? 'color: #dc2626' : 'color: var(--season-dark)';
     return `<div class="rate-card ${borderClass}" style="${borderStyle}">
-      <div class="text-xs text-gray-500 mb-1">${label}</div>
+      <div class="text-xs font-semibold text-gray-600">${label}</div>
+      ${note ? `<div style="font-size:10px;color:#94a3b8;margin-bottom:4px;line-height:1.3">${note}</div>` : ''}
       <div class="text-xl font-bold" style="${valueColor}">${displayVal}</div>
-      <div class="text-sm mt-1">${arrow} <span class="text-gray-500 text-xs">${series.trend}</span></div>
+      <div class="text-sm mt-1">${arrow} <span class="text-gray-400 text-xs">3-mo trend</span></div>
     </div>`;
   }).join('');
 }
@@ -128,26 +129,29 @@ function renderIndicatorsGrid(snapshot) {
     yoyPce = ((curr - yearAgo) / yearAgo) * 100;
   }
 
+  const nfpVal = labor.nfp?.latest ?? null;
+
   const cards = [
-    { label: 'Unemployment', value: labor.unrate.latest, suffix: '%', trend: labor.unrate.trend, decimals: 1 },
-    { label: 'CPI (YoY)', value: yoyCpi, suffix: '%', trend: inflation.cpi.trend, decimals: 2 },
-    { label: 'PCE (YoY)', value: yoyPce, suffix: '%', trend: inflation.pce.trend, decimals: 2 },
-    { label: '5Y Breakeven', value: inflation.t5yie.latest, suffix: '%', trend: inflation.t5yie.trend, decimals: 2 },
-    { label: 'Jobless Claims (K)', value: labor.icsa.latest ? labor.icsa.latest / 1000 : null, suffix: 'K', trend: labor.icsa.trend, decimals: 0 },
-    { label: 'GDP Index', value: growth.gdp.latest, suffix: '', trend: growth.gdp.trend, decimals: 0, note: 'chained 2017 $B' },
-    { label: 'S&P 500', value: snapshot.market.sp500.latest, suffix: '', trend: snapshot.market.sp500.trend, decimals: 0 },
-    { label: 'T5Y Breakeven', value: inflation.t5yie.latest, suffix: '%', trend: inflation.t5yie.trend, decimals: 2 },
+    { label: 'Unemployment', note: 'Healthy range: 3.5–5%', value: labor.unrate.latest, suffix: '%', trend: labor.unrate.trend, decimals: 1 },
+    { label: 'CPI (YoY)', note: "Inflation — Fed target: 2%", value: yoyCpi, suffix: '%', trend: inflation.cpi.trend, decimals: 2 },
+    { label: 'PCE (YoY)', note: "Fed's preferred inflation gauge", value: yoyPce, suffix: '%', trend: inflation.pce.trend, decimals: 2 },
+    { label: '5Y Breakeven', note: 'Market-implied inflation expectation', value: inflation.t5yie.latest, suffix: '%', trend: inflation.t5yie.trend, decimals: 2 },
+    { label: 'Jobless Claims', note: '<250K/wk = strong labor market', value: labor.icsa.latest ? labor.icsa.latest / 1000 : null, suffix: 'K', trend: labor.icsa.trend, decimals: 0 },
+    { label: 'Real GDP', note: 'Chained 2017 dollars (quarterly)', value: growth.gdp.latest, suffix: 'B', trend: growth.gdp.trend, decimals: 0 },
+    { label: 'S&P 500', note: 'US large-cap equity benchmark', value: snapshot.market.sp500.latest, suffix: '', trend: snapshot.market.sp500.trend, decimals: 0 },
+    { label: 'Non-Farm Payrolls', note: '>150K/mo = healthy job growth', value: nfpVal, suffix: 'K', trend: labor.nfp?.trend ?? 'flat', decimals: 0 },
   ];
 
-  grid.innerHTML = cards.slice(0, 8).map(({ label, value, suffix, trend, decimals, note }) => {
+  grid.innerHTML = cards.map(({ label, note, value, suffix, trend, decimals }) => {
     const displayVal = value !== null && value !== undefined
       ? value.toFixed(decimals ?? 2) + suffix
       : 'N/A';
     const arrow = trendArrow(trend);
     return `<div class="rate-card">
-      <div class="text-xs text-gray-500 mb-1">${label}${note ? `<span class="ml-1 text-gray-400">(${note})</span>` : ''}</div>
+      <div class="text-xs font-semibold text-gray-600">${label}</div>
+      ${note ? `<div style="font-size:10px;color:#94a3b8;margin-bottom:4px;line-height:1.3">${note}</div>` : ''}
       <div class="text-xl font-bold" style="color: var(--season-dark)">${displayVal}</div>
-      <div class="text-sm mt-1">${arrow}</div>
+      <div class="text-sm mt-1">${arrow} <span class="text-gray-400 text-xs">trend</span></div>
     </div>`;
   }).join('');
 }

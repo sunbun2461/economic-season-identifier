@@ -23,49 +23,92 @@ function drawDonut(canvasId, allocation, palette) {
   const outerR = Math.min(cx, cy) - 10;
   const innerR = outerR * 0.55;
 
-  const slices = [
-    { label: 'Equities', pct: allocation.equities.pct, color: palette.primary },
-    { label: 'Bonds', pct: allocation.bonds.pct, color: '#3b82f6' },
-    { label: 'Cash', pct: allocation.cash.pct, color: '#6b7280' },
-    { label: 'Alts', pct: allocation.alts.pct, color: '#f97316' },
+  const items = [
+    { key: 'equities', label: 'Equities', pct: allocation.equities.pct, color: palette.primary,  detail: allocation.equities.detail },
+    { key: 'bonds',    label: 'Bonds',    pct: allocation.bonds.pct,    color: '#3b82f6',         detail: allocation.bonds.detail },
+    { key: 'cash',     label: 'Cash',     pct: allocation.cash.pct,     color: '#6b7280',         detail: allocation.cash.detail },
+    { key: 'alts',     label: 'Alts',     pct: allocation.alts.pct,     color: '#f97316',         detail: allocation.alts.detail },
   ];
 
-  ctx.clearRect(0, 0, w, h);
-  let startAngle = -Math.PI / 2;
-
-  slices.forEach(({ pct, color }) => {
-    const angle = (pct / 100) * 2 * Math.PI;
+  function paint(selectedKey) {
+    ctx.clearRect(0, 0, w, h);
+    let startAngle = -Math.PI / 2;
+    items.forEach(({ key, pct, color }) => {
+      const angle = (pct / 100) * 2 * Math.PI;
+      const isSelected = !selectedKey || key === selectedKey;
+      ctx.globalAlpha = isSelected ? 1 : 0.3;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, outerR, startAngle, startAngle + angle);
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      startAngle += angle;
+    });
+    ctx.globalAlpha = 1;
+    // Donut hole
     ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, outerR, startAngle, startAngle + angle);
-    ctx.closePath();
-    ctx.fillStyle = color;
+    ctx.arc(cx, cy, innerR, 0, 2 * Math.PI);
+    ctx.fillStyle = 'white';
     ctx.fill();
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    startAngle += angle;
-  });
-
-  // Donut hole
-  ctx.beginPath();
-  ctx.arc(cx, cy, innerR, 0, 2 * Math.PI);
-  ctx.fillStyle = 'white';
-  ctx.fill();
-
-  // Legend
-  const legend = document.getElementById('donut-legend');
-  if (legend) {
-    legend.innerHTML = slices.map(({ label, pct, color }) => `
-      <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <div class="w-3 h-3 rounded-sm flex-shrink-0" style="background:${color}"></div>
-          <span class="text-gray-600 text-sm">${label}</span>
-        </div>
-        <span class="font-bold text-sm">${pct}%</span>
-      </div>
-    `).join('');
   }
+
+  paint(null);
+
+  // Interactive legend
+  const legend = document.getElementById('donut-legend');
+  const detailPanel = document.getElementById('donut-detail-panel');
+  if (!legend) return;
+
+  let selected = null;
+
+  legend.innerHTML = items.map(({ key, label, pct, color }) => `
+    <div class="donut-leg-row flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-all" data-key="${key}" style="border:1px solid transparent">
+      <div class="flex items-center gap-2">
+        <div class="w-3 h-3 rounded-sm flex-shrink-0" style="background:${color}"></div>
+        <span class="text-gray-600 text-sm">${label}</span>
+      </div>
+      <span class="font-bold text-sm">${pct}%</span>
+    </div>
+  `).join('');
+
+  legend.querySelectorAll('.donut-leg-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const key = row.dataset.key;
+      const data = items.find(i => i.key === key);
+      if (!data) return;
+
+      if (selected === key) {
+        // Deselect
+        selected = null;
+        legend.querySelectorAll('.donut-leg-row').forEach(r => {
+          r.style.background = '';
+          r.style.borderColor = 'transparent';
+          r.style.fontWeight = '';
+        });
+        if (detailPanel) detailPanel.innerHTML = '';
+        paint(null);
+      } else {
+        selected = key;
+        legend.querySelectorAll('.donut-leg-row').forEach(r => {
+          const isThis = r.dataset.key === key;
+          r.style.background = isThis ? `${data.color}12` : '';
+          r.style.borderColor = isThis ? data.color : 'transparent';
+        });
+        if (detailPanel) {
+          detailPanel.innerHTML = `
+            <div style="margin-top:8px;padding:10px 12px;border-radius:8px;background:${data.color}10;border:1px solid ${data.color}35">
+              <div style="font-size:11px;font-weight:700;color:${data.color};margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">${data.label} — ${data.pct}%</div>
+              <div style="font-size:11px;color:#475569;line-height:1.5">${data.detail}</div>
+            </div>`;
+        }
+        paint(key);
+      }
+    });
+  });
 }
 
 function renderPortfolioHeader(portfolio, season) {
@@ -152,6 +195,37 @@ function renderBondDetail(portfolio) {
   if (duration) duration.textContent = portfolio.bondDuration;
 }
 
+function renderAltsDetail(portfolio) {
+  const alts = portfolio.allocation.alts;
+  if (!alts) return;
+
+  const badge = document.getElementById('alts-pct-badge');
+  if (badge) badge.textContent = `${alts.pct}% of portfolio`;
+
+  const detail = alts.detail || '';
+  const cryptoIndex = detail.indexOf('Crypto:');
+
+  const traditionalEl = document.getElementById('alts-traditional');
+  const calloutEl = document.getElementById('alts-crypto-callout');
+  const cryptoTextEl = document.getElementById('alts-crypto-text');
+  const seasonBadge = document.getElementById('alts-season-badge');
+
+  if (cryptoIndex !== -1) {
+    const traditionalPart = detail.slice(0, cryptoIndex).trim().replace(/\.$/, '');
+    const cryptoPart = detail.slice(cryptoIndex + 'Crypto:'.length).trim();
+
+    if (traditionalEl) traditionalEl.textContent = traditionalPart;
+    if (cryptoTextEl) cryptoTextEl.textContent = cryptoPart;
+    if (calloutEl) calloutEl.classList.remove('hidden');
+    if (seasonBadge) {
+      const label = `${portfolio.phase.charAt(0).toUpperCase() + portfolio.phase.slice(1)} ${portfolio.season.charAt(0).toUpperCase() + portfolio.season.slice(1)}`;
+      seasonBadge.textContent = label;
+    }
+  } else {
+    if (traditionalEl) traditionalEl.textContent = detail;
+  }
+}
+
 function renderOverlays(overlays) {
   const section = document.getElementById('overlays-section');
   const list = document.getElementById('overlays-list');
@@ -236,6 +310,7 @@ async function loadData() {
     renderActions(portfolio.buy, portfolio.hold, portfolio.sell);
     renderSectors(portfolio.sectors);
     renderBondDetail(portfolio);
+    renderAltsDetail(portfolio);
     renderOverlays(portfolio.appliedOverlays || season.detectedOverlays);
     renderWatchList(portfolio.watchList);
     renderPhasesAccordion(portfolio);

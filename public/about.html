@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' style='background:transparent'><text y='.9em' font-size='90'>📊</text></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Macro Cycle Tracker — About</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -33,7 +34,7 @@
     }
 
     .season-card-about {
-      border-radius: 20px;
+      border-radius: 5px;
       padding: 1.8rem;
       border: 1px solid rgba(255,255,255,0.12);
       transition: transform 0.25s, box-shadow 0.25s;
@@ -45,7 +46,7 @@
 
     .page-card {
       background: white;
-      border-radius: 20px;
+      border-radius: 5px;
       border: 1px solid #e2e8f0;
       box-shadow: 0 4px 16px rgba(0,0,0,0.05);
       padding: 1.6rem;
@@ -60,7 +61,7 @@
     .page-icon {
       width: 48px;
       height: 48px;
-      border-radius: 13px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -89,7 +90,7 @@
       padding: 0.35rem 0.75rem;
       background: white;
       border: 1px solid #e2e8f0;
-      border-radius: 20px;
+      border-radius: 5px;
       font-size: 0.78rem;
       font-weight: 500;
       color: #475569;
@@ -98,6 +99,34 @@
   </style>
 </head>
 <body class="min-h-screen">
+
+    <!-- Live Ticker Tape -->
+  <div class="ticker-bar">
+    <div class="tradingview-widget-container" style="height:46px">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+      {
+        "symbols": [
+          {"proName":"FOREXCOM:SPXUSD","title":"S\u0026P 500"},
+          {"proName":"DJ:DJI","title":"Dow Jones"},
+          {"proName":"FOREXCOM:NSXUSD","title":"NASDAQ 100"},
+          {"proName":"BITSTAMP:BTCUSD","title":"Bitcoin"},
+          {"proName":"BITSTAMP:ETHUSD","title":"Ethereum"},
+          {"proName":"COINBASE:SOLUSD","title":"Solana"},
+          {"proName":"TVC:GOLD","title":"Gold"},
+          {"proName":"TVC:US10Y","title":"10Y Yield"},
+          {"proName":"ECONOMICS:USINTR","title":"Fed Rate"},
+          {"proName":"FOREXCOM:DXY","title":"US Dollar"}
+        ],
+        "showSymbolLogo": true,
+        "isTransparent": false,
+        "displayMode": "adaptive",
+        "colorTheme": "dark",
+        "locale": "en"
+      }
+      </script>
+    </div>
+  </div>
 
   <header id="site-header" class="site-header text-white sticky top-0 z-50"></header>
 
@@ -115,7 +144,7 @@
         identifies where we are in the interest rate cycle, and translates
         that into actionable portfolio guidance — updated every 4 hours.
       </p>
-      <a href="/" style="display:inline-block;margin-top:2rem;padding:0.75rem 2rem;background:var(--season-primary);color:white;border-radius:12px;font-weight:600;text-decoration:none;font-size:0.95rem;transition:opacity 0.2s">
+      <a href="/" style="display:inline-block;margin-top:2rem;padding:0.75rem 2rem;background:var(--season-primary);color:white;border-radius:4px;font-weight:600;text-decoration:none;font-size:0.95rem;transition:opacity 0.2s">
         Open Dashboard →
       </a>
     </div>

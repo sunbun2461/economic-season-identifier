@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' style='background:transparent'><text y='.9em' font-size='90'>📊</text></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Macro Cycle Tracker — Learn</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -25,7 +26,7 @@
     .cs-item {
       background: white;
       border: 1px solid #e2e8f0;
-      border-radius: 16px;
+      border-radius: 5px;
       overflow: hidden;
       transition: box-shadow 0.2s;
     }
@@ -114,6 +115,34 @@
     .glossary-icon { transition: transform 0.2s; }
     .glossary-header.open .glossary-icon { transform: rotate(180deg); }
 
+    /* Video Library */
+    .vid-cat-btn {
+      font-size: 12px; font-weight: 600; padding: 6px 14px;
+      border-radius: 20px; border: 1px solid #e2e8f0;
+      background: white; color: #64748b; cursor: pointer; transition: all 0.15s;
+    }
+    .vid-cat-btn:hover { border-color: var(--season-primary); color: var(--season-primary); }
+    .vid-cat-btn.active { background: var(--season-primary); color: white; border-color: var(--season-primary); }
+    .vid-card {
+      background: white; border: 1px solid #e2e8f0; border-radius: 10px;
+      overflow: hidden; cursor: pointer; transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .vid-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.09); transform: translateY(-1px); }
+    .vid-thumb {
+      width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #0f172a;
+      display: block;
+    }
+    .vid-thumb-placeholder {
+      width: 100%; aspect-ratio: 16/9; background: #0f172a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem;
+    }
+    .vid-embed {
+      display: none; width: 100%; aspect-ratio: 16/9;
+    }
+    .vid-embed.open { display: block; }
+    .vid-embed iframe { width: 100%; height: 100%; border: none; display: block; }
+
     @keyframes fadeSlideIn {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -147,6 +176,34 @@
 </head>
 <body class="min-h-screen">
 
+    <!-- Live Ticker Tape -->
+  <div class="ticker-bar">
+    <div class="tradingview-widget-container" style="height:46px">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+      {
+        "symbols": [
+          {"proName":"FOREXCOM:SPXUSD","title":"S\u0026P 500"},
+          {"proName":"DJ:DJI","title":"Dow Jones"},
+          {"proName":"FOREXCOM:NSXUSD","title":"NASDAQ 100"},
+          {"proName":"BITSTAMP:BTCUSD","title":"Bitcoin"},
+          {"proName":"BITSTAMP:ETHUSD","title":"Ethereum"},
+          {"proName":"COINBASE:SOLUSD","title":"Solana"},
+          {"proName":"TVC:GOLD","title":"Gold"},
+          {"proName":"TVC:US10Y","title":"10Y Yield"},
+          {"proName":"ECONOMICS:USINTR","title":"Fed Rate"},
+          {"proName":"FOREXCOM:DXY","title":"US Dollar"}
+        ],
+        "showSymbolLogo": true,
+        "isTransparent": false,
+        "displayMode": "adaptive",
+        "colorTheme": "dark",
+        "locale": "en"
+      }
+      </script>
+    </div>
+  </div>
+
   <header id="site-header" class="site-header text-white sticky top-0 z-50"></header>
 
   <div id="season-key-bar" class="overflow-x-auto sticky top-14 z-40">
@@ -161,6 +218,7 @@
       <a href="#section-phases"      class="learn-nav-link">8 Phases</a>
       <a href="#section-allocations" class="learn-nav-link">Allocations</a>
       <a href="#section-history"     class="learn-nav-link">History</a>
+      <a href="#section-videos"      class="learn-nav-link">Videos</a>
       <a href="#section-glossary"    class="learn-nav-link">Glossary</a>
     </div>
   </div>
@@ -333,6 +391,15 @@
       <h2 class="learn-heading text-2xl font-bold text-slate-900 mb-2">Historical Cycle Examples</h2>
       <p class="text-slate-500 mb-8 max-w-2xl">How the four seasons played out in major historical episodes and what each one taught investors.</p>
       <div id="history-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- ─── Video Library ───────────────────────────────────────────────────── -->
+    <section id="section-videos">
+      <p class="section-overline mb-3">Video Education</p>
+      <h2 class="learn-heading text-2xl font-bold text-slate-900 mb-2">Video Library</h2>
+      <p class="text-slate-500 mb-6 max-w-2xl">Curated videos on macroeconomics, valuation, fixed income, and crypto as a macro asset. Click any card to play inline — no context switching.</p>
+      <div id="video-cat-tabs" class="flex flex-wrap gap-2 mb-6"></div>
+      <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
     </section>
 
     <!-- ─── Glossary ──────────────────────────────────────────────────────── -->

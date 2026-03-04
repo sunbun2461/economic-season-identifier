@@ -14,7 +14,7 @@ const phaseModels: Record<string, PhaseModel> = {
       equities: { pct: 55, detail: 'Growth, small caps, tech, consumer discretionary' },
       bonds: { pct: 25, detail: 'Extend to intermediate/long — lock yields before they fall' },
       cash: { pct: 10, detail: 'Reduce from winter levels' },
-      alts: { pct: 10, detail: 'Gold hedge + start REIT position' },
+      alts: { pct: 10, detail: 'Gold (GLD) as uncertainty hedge. Start REIT position. Crypto: begin accumulating BTC/ETH (3–5% of portfolio) — historically the start of crypto bull cycles as liquidity returns.' },
     },
     sectors: [
       { name: 'Technology', weight: 'overweight', reason: 'Benefits from falling rates' },
@@ -65,7 +65,7 @@ const phaseModels: Record<string, PhaseModel> = {
       equities: { pct: 65, detail: 'Cyclicals, tech, small caps, international, selective EM' },
       bonds: { pct: 20, detail: 'Intermediate, shifting Treasuries → IG corporates' },
       cash: { pct: 5, detail: 'Minimal — opportunity cost too high' },
-      alts: { pct: 10, detail: 'Overweight REITs + commodities building' },
+      alts: { pct: 10, detail: 'Overweight REITs (VNQ) + commodities building (DJP). Crypto: peak allocation window — BTC/ETH/SOL can be 5–10% of portfolio. Risk-on environment historically coincides with strongest crypto performance.' },
     },
     sectors: [
       { name: 'Industrials', weight: 'overweight', reason: 'Capex cycle begins, supply chain recovery' },
@@ -117,7 +117,7 @@ const phaseModels: Record<string, PhaseModel> = {
       equities: { pct: 60, detail: 'Financials, energy, industrials — rotate growth → value' },
       bonds: { pct: 20, detail: 'Short duration, floating rate, TIPS' },
       cash: { pct: 10, detail: 'Building the war chest slowly' },
-      alts: { pct: 10, detail: 'Overweight commodities, gold neutral' },
+      alts: { pct: 10, detail: 'Overweight commodities (DJP, XLE). Gold neutral. Crypto: begin trimming — rotate profits from BTC/ETH into value stocks and commodities. Keep a small position (2–3%) but reduce speculative exposure.' },
     },
     sectors: [
       { name: 'Financials', weight: 'overweight', reason: 'Full employment, loan demand strong' },
@@ -168,7 +168,7 @@ const phaseModels: Record<string, PhaseModel> = {
       equities: { pct: 50, detail: 'Quality, dividends, low-vol only' },
       bonds: { pct: 20, detail: 'Short only — floating rate, T-bills' },
       cash: { pct: 20, detail: 'BUILD THE WAR CHEST. HY savings + money market.' },
-      alts: { pct: 10, detail: 'Take commodity profits, add gold as hedge' },
+      alts: { pct: 10, detail: 'Take commodity profits. Add gold (GLD) as hedge. Crypto: reduce to stablecoins (USDC/USDT) or exit positions — liquidity risk spikes when hiking signals emerge. BTC historically -30 to -60% from peak by end of late summer.' },
     },
     sectors: [
       { name: 'Healthcare', weight: 'overweight', reason: 'Defensive, pricing power, non-cyclical' },
@@ -220,7 +220,7 @@ const phaseModels: Record<string, PhaseModel> = {
       equities: { pct: 45, detail: 'Healthcare, staples, utilities, energy — low beta only' },
       bonds: { pct: 20, detail: 'Short duration only — T-bills, floating rate' },
       cash: { pct: 25, detail: 'Maximum. Being PAID to wait. Lock CD rates.' },
-      alts: { pct: 10, detail: 'Gold slight overweight' },
+      alts: { pct: 10, detail: 'Gold (GLD) slight overweight — inflation hedge. Crypto: avoid or hold stablecoins only (USDC). Hiking cycles destroy speculative assets. Any remaining crypto should be treated as speculative risk — not a hedge.' },
     },
     sectors: [
       { name: 'Healthcare', weight: 'overweight', reason: 'Non-cyclical, pricing power, moats' },
@@ -272,7 +272,7 @@ const phaseModels: Record<string, PhaseModel> = {
       equities: { pct: 35, detail: 'Only most defensive — utilities, staples, healthcare' },
       bonds: { pct: 25, detail: 'Start extending duration — inverted curve = long bonds cheap' },
       cash: { pct: 30, detail: 'Still king. Lock 12-month CDs.' },
-      alts: { pct: 10, detail: 'Strong gold position' },
+      alts: { pct: 10, detail: 'Strong gold (GLD) position — flight to safety. Crypto: stablecoins only. BTC/ETH historically bottom in late autumn to early winter. Do not buy yet — capitulation not complete. Watch for fear-and-greed index < 20.' },
     },
     sectors: [
       { name: 'Consumer Staples', weight: 'overweight', reason: 'Maximum defensiveness needed' },
@@ -323,7 +323,7 @@ const phaseModels: Record<string, PhaseModel> = {
       equities: { pct: 35, detail: 'Defensive still + DCA into SPY/VOO in small tranches' },
       bonds: { pct: 30, detail: 'Long bonds paying off. Late-autumn TLT position winning.' },
       cash: { pct: 25, detail: 'Start deploying into equities in tranches' },
-      alts: { pct: 10, detail: 'Gold usually peaks here — trim' },
+      alts: { pct: 10, detail: 'Gold (GLD) usually peaks in panic — begin trimming. Crypto: THIS is historically the best BTC/ETH entry point. Start DCA into BTC with 2–3% of portfolio. Crypto leads equities out of winter by 3–6 months historically.' },
     },
     sectors: [
       { name: 'Consumer Staples', weight: 'overweight', reason: 'Defensive earnings hold up' },
@@ -371,7 +371,7 @@ const phaseModels: Record<string, PhaseModel> = {
       equities: { pct: 55, detail: 'THE buying opportunity — aggressive into growth, small caps, beaten-down quality' },
       bonds: { pct: 25, detail: 'Take long bond profits, rotate to intermediate + IG corporates' },
       cash: { pct: 10, detail: 'Deploy most remaining — by the time spring is obvious, rally is 20-30% old' },
-      alts: { pct: 10, detail: 'Start REIT position, trim gold' },
+      alts: { pct: 10, detail: 'Start REIT position (VNQ). Trim gold as risk appetite returns. Crypto: aggressively accumulate BTC, ETH, SOL (5–10%) — late winter into early spring is the single best historical entry window for crypto across every major cycle.' },
     },
     sectors: [
       { name: 'Technology', weight: 'overweight', reason: 'Beaten down = maximum spring rally potential' },

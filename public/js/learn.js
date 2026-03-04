@@ -5,6 +5,12 @@ const { applyTheme, buildHeader, buildKeyBar, setupAccordion } = window.MacroThe
 
 const CS_RENDERERS = {};
 
+// ─── SEASON CLASS MAPS ─────────────────────────────────────────────────────────
+const SC_CLS   = { spring:'bg-emerald-500', summer:'bg-yellow-400', autumn:'bg-orange-500', winter:'bg-blue-500' };
+const PILL_CLS = { spring:'bg-emerald-50 text-emerald-600', summer:'bg-yellow-50 text-yellow-600', autumn:'bg-orange-50 text-orange-600', winter:'bg-blue-50 text-blue-600' };
+const RING_CLS = { spring:'ring-2 ring-emerald-500', summer:'ring-2 ring-yellow-400', autumn:'ring-2 ring-orange-500', winter:'ring-2 ring-blue-500' };
+const TEXT_CLS = { spring:'text-emerald-600', summer:'text-yellow-600', autumn:'text-orange-600', winter:'text-blue-600' };
+
 window.toggleCheatSheet = function(itemId, componentName) {
   const item = document.getElementById(itemId);
   if (!item) { console.error('[Learn] toggleCheatSheet: item not found:', itemId); return; }
@@ -24,10 +30,10 @@ window.toggleCheatSheet = function(itemId, componentName) {
         console.log('[Learn] Rendered:', componentName);
       } catch (err) {
         console.error('[Learn] Render error in', componentName, ':', err);
-        target.innerHTML = `<div style="padding:2rem;color:#ef4444;font-size:0.85rem;text-align:center">
-          <strong>Render error in ${componentName}</strong><br>
-          <code style="font-size:0.75rem;color:#dc2626">${err.message}</code><br>
-          <small style="color:#94a3b8">Check browser console (F12) for details.</small>
+        target.innerHTML = `<div class="p-8 text-center">
+          <p class="text-red-500 text-sm font-semibold mb-1">Render error in ${componentName}</p>
+          <code class="text-xs text-red-600">${err.message}</code>
+          <p class="text-xs text-slate-400 mt-1">Check browser console (F12) for details.</p>
         </div>`;
       }
     } else if (!CS_RENDERERS[componentName]) {
@@ -41,19 +47,19 @@ window.toggleCheatSheet = function(itemId, componentName) {
 function fadeAnim() { return 'animation:fadeSlideIn 0.3s ease'; }
 
 function pillTag(text, fg, bg) {
-  return `<span style="display:inline-block;padding:0.22rem 0.55rem;border-radius:20px;font-size:0.68rem;font-weight:500;background:${bg};color:${fg}">${text}</span>`;
+  return `<span class="inline-block px-2 py-0.5 rounded-full text-[0.68rem] font-medium" style="background:${bg};color:${fg}">${text}</span>`;
 }
 
 function factRow(text, color) {
-  return `<div style="display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0.6rem;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0"><span style="width:4px;height:4px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span><span style="font-size:0.75rem;color:#475569;font-weight:500">${text}</span></div>`;
+  return `<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-50 border border-gray-200"><span class="w-1 h-1 rounded-full flex-shrink-0 inline-block" style="background:${color}"></span><span class="text-xs text-slate-600 font-medium">${text}</span></div>`;
 }
 
 function overline(text) {
-  return `<p style="font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.15em;color:#94a3b8;margin-bottom:0.4rem">${text}</p>`;
+  return `<p class="text-[0.62rem] font-semibold uppercase tracking-widest text-slate-400 mb-1.5">${text}</p>`;
 }
 
 function placeholder(icon, title, body) {
-  return `<div style="background:white;border-radius:18px;padding:2rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid #e2e8f0"><div style="font-size:2rem;margin-bottom:0.6rem;opacity:0.5">${icon}</div><p style="font-size:0.88rem;font-weight:600;color:#334155;margin-bottom:0.3rem">${title}</p><p style="font-size:0.79rem;color:#94a3b8;line-height:1.6">${body}</p></div>`;
+  return `<div class="bg-white rounded border border-gray-200 p-8 text-center shadow-sm"><div class="text-3xl mb-2 opacity-50">${icon}</div><p class="text-sm font-semibold text-slate-800 mb-1">${title}</p><p class="text-xs text-slate-400 leading-relaxed">${body}</p></div>`;
 }
 
 const FADE_STYLE = `<style>@keyframes fadeSlideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}</style>`;
@@ -100,7 +106,7 @@ CS_RENDERERS.cycleWheel = function(container) {
       return `<text x="${mp.x}" y="${mp.y-13}" text-anchor="middle" style="font-size:0.95rem;font-weight:700;fill:${p.dk};font-family:'DM Sans',sans-serif;pointer-events:none">${p.icon} ${p.n}</text>
               <text x="${mp.x}" y="${mp.y+7}" text-anchor="middle" style="font-size:0.62rem;font-weight:600;fill:#64748b;text-transform:uppercase;letter-spacing:0.1em;pointer-events:none">${p.s}</text>`;
     }).join('');
-    return `<div style="text-align:center">
+    return `<div class="text-center">
       <svg width="${SZ}" height="${SZ}" viewBox="0 0 ${SZ} ${SZ}" style="max-width:100%">
         <defs>${defs}<filter id="cwsh"><feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.07"/></filter></defs>
         <g filter="url(#cwsh)">${segs}</g>
@@ -109,43 +115,43 @@ CS_RENDERERS.cycleWheel = function(container) {
         <text x="${C}" y="${C-7}" text-anchor="middle" style="font-size:0.58rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;fill:#94a3b8">Economic</text>
         <text x="${C}" y="${C+10}" text-anchor="middle" style="font-size:0.58rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;fill:#94a3b8">Cycle</text>
       </svg>
-      <p style="font-size:0.67rem;color:#94a3b8;margin-top:0.5rem">Spring → Summer → Autumn → Winter →</p>
+      <p class="text-[0.67rem] text-slate-400 mt-2">Spring → Summer → Autumn → Winter →</p>
     </div>`;
   }
 
   function buildDetail() {
     if (act === null) return placeholder('📊','Explore each phase','Click a segment to see indicators and favored assets for that phase.');
     const p = PH[act];
-    return `<div style="background:white;border-radius:16px;padding:1.8rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 24px rgba(0,0,0,0.06);border:1px solid ${p.c}22;${fadeAnim()}">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem">
-        <span style="font-size:1.5rem">${p.icon}</span>
+    return `<div class="bg-white rounded p-7 shadow-md border" style="border-color:${p.c}22;${fadeAnim()}">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl">${p.icon}</span>
         <div>
-          <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;font-weight:700;color:${p.c};margin:0">${p.n}</h3>
-          <span style="font-size:0.63rem;text-transform:uppercase;letter-spacing:0.12em;color:#94a3b8;font-weight:600">${p.s}</span>
+          <h3 class="font-bold text-[1.4rem] m-0" style="font-family:'Playfair Display',serif;color:${p.c}">${p.n}</h3>
+          <span class="text-[0.63rem] uppercase tracking-widest text-slate-400 font-semibold">${p.s}</span>
         </div>
       </div>
-      <p style="font-size:0.83rem;color:#475569;line-height:1.65;margin-bottom:1rem">${p.desc}</p>
+      <p class="text-[0.83rem] text-slate-600 leading-relaxed mb-4">${p.desc}</p>
       ${overline('Key Indicators')}
-      <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:1rem">${p.ind.map(x => pillTag(x, p.c, p.c+'15')).join('')}</div>
+      <div class="flex flex-wrap gap-1.5 mb-4">${p.ind.map(x => pillTag(x, p.c, p.c+'15')).join('')}</div>
       ${overline('Favored Assets')}
-      <div style="display:flex;flex-wrap:wrap;gap:0.3rem">${p.ast.map(x => pillTag(x, '#475569', '#f8fafc')).join('')}</div>
+      <div class="flex flex-wrap gap-1.5">${p.ast.map(x => pillTag(x, '#475569', '#f8fafc')).join('')}</div>
     </div>`;
   }
 
   function buildBtns() {
-    return PH.map((p,i) => `<button class="cw-btn" data-i="${i}" style="display:flex;align-items:center;gap:0.4rem;padding:0.42rem 0.8rem;border-radius:9px;border:${act===i?`2px solid ${p.c}`:'2px solid transparent'};background:${act===i?p.c+'14':'white'};cursor:pointer">
-      <span style="width:7px;height:7px;border-radius:50%;background:${p.c};display:inline-block"></span>
-      <span style="font-size:0.78rem;font-weight:600;color:#334155">${p.n}</span>
-      <span style="font-size:0.68rem;color:#94a3b8">${p.s}</span>
+    return PH.map((p,i) => `<button class="cw-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer" data-i="${i}" style="border:${act===i?`2px solid ${p.c}`:'2px solid transparent'};background:${act===i?p.c+'14':'white'}">
+      <span class="w-2 h-2 rounded-full inline-block" style="background:${p.c}"></span>
+      <span class="text-[0.78rem] font-semibold text-slate-800">${p.n}</span>
+      <span class="text-[0.68rem] text-slate-400">${p.s}</span>
     </button>`).join('');
   }
 
   container.innerHTML = `${FADE_STYLE}
-    <div style="display:flex;gap:2rem;align-items:center;justify-content:center;flex-wrap:wrap">
+    <div class="flex gap-8 items-center justify-center flex-wrap">
       <div id="cw-wheel">${buildSVG()}</div>
-      <div style="flex:1 1 280px;max-width:340px"><div id="cw-detail">${buildDetail()}</div></div>
+      <div class="flex-1 basis-72 max-w-sm"><div id="cw-detail">${buildDetail()}</div></div>
     </div>
-    <div id="cw-btns" style="display:flex;justify-content:center;gap:0.8rem;margin-top:1.5rem;flex-wrap:wrap">${buildBtns()}</div>`;
+    <div id="cw-btns" class="flex justify-center gap-3 mt-6 flex-wrap">${buildBtns()}</div>`;
 
   function toggle(i) {
     act = act === i ? null : i;
@@ -215,7 +221,7 @@ CS_RENDERERS.yieldCurve = function(container) {
         <text x="${last.x+12}" y="${last.y+5}" style="font-size:0.78rem;font-weight:700;fill:${c.c};font-family:'DM Sans',sans-serif">${c.n}</text>
       </g>`;
     }).join('');
-    return `<div style="background:white;border-radius:20px;padding:1.2rem 1.2rem 0.8rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 32px rgba(0,0,0,0.06);border:1px solid #e2e8f0">
+    return `<div class="bg-white rounded border border-gray-200 shadow-sm pt-4 px-4 pb-2">
       <svg viewBox="0 0 ${SW} ${SH}" width="100%" style="display:block">
         ${grid}
         <line x1="${CX}" y1="${CY}" x2="${CX}" y2="${bottom}" stroke="#cbd5e1" stroke-width="1.5"/>
@@ -225,10 +231,10 @@ CS_RENDERERS.yieldCurve = function(container) {
         <text x="12" y="${CY+CH/2}" text-anchor="middle" transform="rotate(-90,12,${CY+CH/2})" style="font-size:0.63rem;fill:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.1em">Yield</text>
         ${curves}
       </svg>
-      <div style="display:flex;justify-content:center;gap:1rem;padding:0.6rem 0 0.2rem;border-top:1px solid #f1f5f9;flex-wrap:wrap">
-        ${CURVES.map((c,i) => `<button class="yc-btn" data-i="${i}" style="display:flex;align-items:center;gap:0.35rem;padding:0.4rem 0.8rem;border-radius:8px;border:${act===i?`2px solid ${c.c}`:'2px solid transparent'};background:${act===i?c.cL:'transparent'};cursor:pointer">
-          <span style="display:inline-block;width:18px;height:3px;background:${c.c};border-radius:2px;${c.dash?'border-top:2px dashed '+c.c+';background:none;height:0':''}" ></span>
-          <span style="font-size:0.76rem;font-weight:600;color:${act===i?c.c:'#64748b'}">${c.n}</span>
+      <div class="flex justify-center gap-4 py-2 border-t border-slate-100 flex-wrap">
+        ${CURVES.map((c,i) => `<button class="yc-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer" data-i="${i}" style="border:${act===i?`2px solid ${c.c}`:'2px solid transparent'};background:${act===i?c.cL:'transparent'}">
+          <span class="inline-block w-4 h-0.5 rounded-sm" style="background:${c.c};${c.dash?'border-top:2px dashed '+c.c+';background:none':''}" ></span>
+          <span class="text-[0.76rem] font-semibold" style="color:${act===i?c.c:'#64748b'}">${c.n}</span>
         </button>`).join('')}
       </div>
     </div>`;
@@ -237,24 +243,24 @@ CS_RENDERERS.yieldCurve = function(container) {
   function buildDetail() {
     if (act === null) return placeholder('📐','Select a curve','Click on any curve or use the legend to explore what each shape signals about the economy.');
     const c = CURVES[act];
-    return `<div style="background:white;border-radius:18px;padding:1.8rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid ${c.c}18;${fadeAnim()}">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem">
-        <span style="font-size:1.4rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:${c.cL};border-radius:12px">${c.icon}</span>
+    return `<div class="bg-white rounded p-7 shadow-md border" style="border-color:${c.c}18;${fadeAnim()}">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl w-11 h-11 flex items-center justify-center rounded" style="background:${c.cL}">${c.icon}</span>
         <div>
-          <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;font-weight:700;color:${c.c};margin:0">${c.n}</h3>
-          <span style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.12em;color:#94a3b8;font-weight:600">${c.sig}</span>
+          <h3 class="font-bold text-[1.4rem] m-0" style="font-family:'Playfair Display',serif;color:${c.c}">${c.n}</h3>
+          <span class="text-[0.66rem] uppercase tracking-widest text-slate-400 font-semibold">${c.sig}</span>
         </div>
       </div>
-      <p style="font-size:0.83rem;color:#475569;line-height:1.7;margin-bottom:1rem">${c.desc}</p>
+      <p class="text-[0.83rem] text-slate-600 leading-relaxed mb-4">${c.desc}</p>
       ${overline('Implications')}
-      <div style="display:flex;flex-direction:column;gap:0.3rem">${c.impl.map(x => factRow(x, c.c)).join('')}</div>
+      <div class="flex flex-col gap-1.5">${c.impl.map(x => factRow(x, c.c)).join('')}</div>
     </div>`;
   }
 
   container.innerHTML = `${FADE_STYLE}
-    <div style="display:flex;gap:2rem;align-items:center;justify-content:center;flex-wrap:wrap">
-      <div id="yc-chart" style="flex:1 1 520px;max-width:640px">${buildChart()}</div>
-      <div style="flex:1 1 280px;max-width:340px"><div id="yc-detail">${buildDetail()}</div></div>
+    <div class="flex gap-8 items-center justify-center flex-wrap">
+      <div id="yc-chart" class="flex-1 basis-[520px] max-w-[640px]">${buildChart()}</div>
+      <div class="flex-1 basis-72 max-w-sm"><div id="yc-detail">${buildDetail()}</div></div>
     </div>`;
 
   function toggle(i) {
@@ -300,7 +306,7 @@ CS_RENDERERS.rateFlow = function(container) {
   function buildNode(node) {
     const isAct = act === node.id;
     return `<div class="rf-node" data-id="${node.id}" style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;cursor:pointer">
-      <div style="background:linear-gradient(135deg,${node.c},${node.c}dd);border-radius:14px;padding:0.75rem 1.4rem;text-align:center;min-width:130px;box-shadow:${isAct?`0 4px 20px ${node.c}35,0 0 0 3px ${node.c}25`:`0 2px 8px ${node.c}20`};transition:box-shadow 0.3s">
+      <div style="background:linear-gradient(135deg,${node.c},${node.c}dd);border-radius:5px;padding:0.75rem 1.4rem;text-align:center;min-width:130px;box-shadow:${isAct?`0 4px 20px ${node.c}35,0 0 0 3px ${node.c}25`:`0 2px 8px ${node.c}20`};transition:box-shadow 0.3s">
         <div style="font-size:0.72rem;margin-bottom:0.1rem">${node.icon}</div>
         <div style="color:white;font-weight:700;font-size:${node.tier===0?'1rem':'0.88rem'};font-family:'DM Sans',sans-serif">${node.label}</div>
       </div>
@@ -309,63 +315,63 @@ CS_RENDERERS.rateFlow = function(container) {
   }
 
   function buildDiagram() {
-    return `<div style="background:white;border-radius:24px;padding:2rem 1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 32px rgba(0,0,0,0.06);border:1px solid #e2e8f0">
-      <div style="display:flex;justify-content:center;margin-bottom:0">${buildNode(NODES.fed)}</div>
-      <div style="display:flex;justify-content:center;padding:0.5rem 0">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:0.2rem">
-          <div style="width:2px;height:26px;background:linear-gradient(to bottom,#3b82f6,#8b5cf6);border-radius:1px"></div>
+    return `<div class="bg-white rounded border border-gray-200 shadow-sm p-8">
+      <div class="flex justify-center mb-0">${buildNode(NODES.fed)}</div>
+      <div class="flex justify-center py-2">
+        <div class="flex flex-col items-center gap-0.5">
+          <div class="w-0.5 h-6 rounded" style="background:linear-gradient(to bottom,#3b82f6,#8b5cf6)"></div>
           <svg width="12" height="8"><path d="M 1 1 L 6 6 L 11 1" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
-      <div style="display:flex;justify-content:center;margin-bottom:0">${buildNode(NODES.treasury)}</div>
-      <div style="display:flex;justify-content:center;padding:0.4rem 0 0.2rem">
+      <div class="flex justify-center mb-0">${buildNode(NODES.treasury)}</div>
+      <div class="flex justify-center py-1">
         <svg width="340" height="38" viewBox="0 0 340 38" style="overflow:visible">
           <path d="M 170 0 L 170 12 Q 170 20 162 23 L 50 36" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round"/>
           <path d="M 170 0 L 170 33" fill="none" stroke="#f97316" stroke-width="1.8" stroke-linecap="round"/>
           <path d="M 170 0 L 170 12 Q 170 20 178 23 L 290 36" fill="none" stroke="#eab308" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;padding:0 0.25rem">
+      <div class="flex justify-between items-start gap-2 px-1">
         ${buildNode(NODES.mortgages)}${buildNode(NODES.corpBonds)}${buildNode(NODES.savings)}
       </div>
-      <p style="text-align:center;font-size:0.74rem;color:#94a3b8;font-style:italic;margin-top:1.2rem;padding-top:0.8rem;border-top:1px solid #f1f5f9">Rate changes ripple through the entire economy</p>
+      <p class="text-center text-[0.74rem] text-slate-400 italic mt-4 pt-3 border-t border-slate-100">Rate changes ripple through the entire economy</p>
     </div>`;
   }
 
   function buildDetail() {
-    if (!act) return `<div style="background:white;border-radius:18px;padding:2rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid #e2e8f0">
-      <div style="font-size:2rem;margin-bottom:0.6rem;opacity:0.5">🏛️</div>
-      <p style="font-size:0.88rem;font-weight:600;color:#334155;margin-bottom:0.3rem">Explore the flow</p>
-      <p style="font-size:0.79rem;color:#94a3b8;line-height:1.6;margin-bottom:1.2rem">Click any node to learn how that rate connects to the broader economy.</p>
-      <div style="padding:0.8rem;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;text-align:left">
+    if (!act) return `<div class="bg-white rounded border border-gray-200 p-8 text-center shadow-sm">
+      <div class="text-3xl mb-2 opacity-50">🏛️</div>
+      <p class="text-sm font-semibold text-slate-800 mb-1">Explore the flow</p>
+      <p class="text-xs text-slate-400 leading-relaxed mb-4">Click any node to learn how that rate connects to the broader economy.</p>
+      <div class="px-3 py-2.5 rounded bg-slate-50 border border-gray-200 text-left">
         ${overline('Transmission Chain')}
         ${[{i:'🏛️',l:'Fed sets rate'},{i:'📜',l:'Treasuries adjust'},{i:'📡',l:'Markets reprice'},{i:'🌍',l:'Economy responds'}]
-          .map(s => `<div style="display:flex;align-items:center;gap:0.45rem;padding:0.3rem 0"><span style="font-size:0.85rem">${s.i}</span><span style="font-size:0.76rem;color:#475569;font-weight:500">${s.l}</span></div>`).join('')}
+          .map(s => `<div class="flex items-center gap-1.5 py-1"><span class="text-sm">${s.i}</span><span class="text-[0.76rem] text-slate-600 font-medium">${s.l}</span></div>`).join('')}
       </div>
     </div>`;
     const n = NODES[act];
-    return `<div style="background:white;border-radius:18px;padding:1.8rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid ${n.c}18;${fadeAnim()}">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem">
-        <span style="font-size:1.4rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:${n.cL};border-radius:12px">${n.icon}</span>
+    return `<div class="bg-white rounded p-7 shadow-md border" style="border-color:${n.c}18;${fadeAnim()}">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl w-11 h-11 flex items-center justify-center rounded" style="background:${n.cL}">${n.icon}</span>
         <div>
-          <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${n.c};margin:0">${n.label}</h3>
-          <span style="font-size:0.67rem;color:#94a3b8;font-weight:500">${n.sub}</span>
+          <h3 class="font-bold text-[1.35rem] m-0" style="font-family:'Playfair Display',serif;color:${n.c}">${n.label}</h3>
+          <span class="text-[0.67rem] text-slate-400 font-medium">${n.sub}</span>
         </div>
       </div>
-      <p style="font-size:0.82rem;color:#475569;line-height:1.7;margin-bottom:0.8rem">${n.desc}</p>
-      <div style="background:${n.c}08;border:1px solid ${n.c}15;border-radius:12px;padding:0.75rem;margin-bottom:0.8rem">
+      <p class="text-[0.82rem] text-slate-600 leading-relaxed mb-3">${n.desc}</p>
+      <div class="rounded p-3 mb-3" style="background:${n.c}08;border:1px solid ${n.c}15">
         ${overline('How it works')}
-        <p style="font-size:0.78rem;color:#475569;line-height:1.65">${n.mech}</p>
+        <p class="text-[0.78rem] text-slate-600 leading-relaxed">${n.mech}</p>
       </div>
       ${overline('Key Effects')}
-      <div style="display:flex;flex-direction:column;gap:0.28rem">${n.effects.map(e => factRow(e, n.c)).join('')}</div>
+      <div class="flex flex-col gap-1.5">${n.effects.map(e => factRow(e, n.c)).join('')}</div>
     </div>`;
   }
 
   container.innerHTML = `${FADE_STYLE}
-    <div style="display:flex;gap:2rem;align-items:center;justify-content:center;flex-wrap:wrap">
-      <div id="rf-diagram" style="flex:1 1 440px;max-width:520px">${buildDiagram()}</div>
-      <div style="flex:1 1 280px;max-width:340px"><div id="rf-detail">${buildDetail()}</div></div>
+    <div class="flex gap-8 items-center justify-center flex-wrap">
+      <div id="rf-diagram" class="flex-1 basis-[440px] max-w-[520px]">${buildDiagram()}</div>
+      <div class="flex-1 basis-72 max-w-sm"><div id="rf-detail">${buildDetail()}</div></div>
     </div>`;
 
   function toggle(id) {
@@ -409,11 +415,11 @@ CS_RENDERERS.dualMandate = function(container) {
 
   function buildScale() {
     const t = effectiveTilt();
-    return `<div style="background:white;border-radius:24px;padding:1.8rem 1.5rem 1.2rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 32px rgba(0,0,0,0.06);border:1px solid #e2e8f0">
-      <div style="text-align:center;margin-bottom:1.2rem">
-        <div style="display:inline-flex;align-items:center;gap:0.5rem;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;border-radius:12px;padding:0.5rem 1rem">
-          <span style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;color:#2563eb">2%</span>
-          <div style="text-align:left"><div style="font-size:0.7rem;font-weight:600;color:#1e40af">Inflation Target</div><div style="font-size:0.6rem;color:#60a5fa">Price Stability Anchor</div></div>
+    return `<div class="bg-white rounded border border-gray-200 shadow-sm px-6 pt-7 pb-5">
+      <div class="text-center mb-5">
+        <div class="inline-flex items-center gap-2 rounded border border-blue-200 px-4 py-2" style="background:linear-gradient(135deg,#eff6ff,#dbeafe)">
+          <span class="text-xl font-bold text-blue-700" style="font-family:'JetBrains Mono',monospace">2%</span>
+          <div class="text-left"><div class="text-[0.7rem] font-semibold text-blue-900">Inflation Target</div><div class="text-[0.6rem] text-blue-400">Price Stability Anchor</div></div>
         </div>
       </div>
       <svg viewBox="0 0 500 280" width="100%" style="display:block;overflow:visible">
@@ -443,57 +449,57 @@ CS_RENDERERS.dualMandate = function(container) {
           <polygon points="250,111 242,100 258,100" fill="#475569"/>
         </g>
       </svg>
-      <p style="text-align:center;font-size:0.7rem;color:#94a3b8;font-style:italic;margin:0.5rem 0 0.8rem">⚖️ These goals often conflict — that's why the Fed's job is hard</p>
-      <div style="display:flex;justify-content:center;gap:0.7rem;padding-top:0.8rem;border-top:1px solid #f1f5f9">
-        ${Object.values(MANDATES).map(m => `<button class="dm-btn" data-id="${m.id}" style="display:flex;align-items:center;gap:0.35rem;padding:0.48rem 0.9rem;border-radius:9px;border:${act===m.id?`2px solid ${m.c}`:'2px solid transparent'};background:${act===m.id?m.cL:'#f8fafc'};cursor:pointer">
-          <span style="font-size:0.82rem">${m.icon}</span>
-          <span style="font-size:0.78rem;font-weight:600;color:${act===m.id?m.cD:'#64748b'}">${m.label}</span>
+      <p class="text-center text-[0.7rem] text-slate-400 italic my-2">⚖️ These goals often conflict — that's why the Fed's job is hard</p>
+      <div class="flex justify-center gap-3 pt-3 border-t border-slate-100">
+        ${Object.values(MANDATES).map(m => `<button class="dm-btn flex items-center gap-1.5 px-3 py-2 rounded-lg cursor-pointer" data-id="${m.id}" style="border:${act===m.id?`2px solid ${m.c}`:'2px solid transparent'};background:${act===m.id?m.cL:'#f8fafc'}">
+          <span class="text-sm">${m.icon}</span>
+          <span class="text-[0.78rem] font-semibold" style="color:${act===m.id?m.cD:'#64748b'}">${m.label}</span>
         </button>`).join('')}
       </div>
     </div>`;
   }
 
   function buildDetail() {
-    if (!act) return `<div style="background:white;border-radius:18px;padding:2rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid #e2e8f0">
-      <div style="font-size:2rem;margin-bottom:0.6rem;opacity:0.5">⚖️</div>
-      <p style="font-size:0.88rem;font-weight:600;color:#334155;margin-bottom:0.3rem">A delicate balance</p>
-      <p style="font-size:0.79rem;color:#94a3b8;line-height:1.6;margin-bottom:1.2rem">Click either side of the scale to explore how the Fed navigates its two competing mandates.</p>
-      <div style="display:flex;gap:0.5rem;justify-content:center">
-        ${Object.values(MANDATES).map(m => `<div style="flex:1;padding:0.75rem;border-radius:12px;background:${m.cL};border:1px solid ${m.c}30;text-align:center">
-          <div style="font-size:1.3rem;margin-bottom:0.3rem">${m.icon}</div>
-          <div style="font-size:0.76rem;font-weight:700;color:${m.cD}">${m.label}</div>
-          <div style="font-size:0.64rem;color:#64748b;margin-top:0.1rem">${m.sub}</div>
+    if (!act) return `<div class="bg-white rounded border border-gray-200 p-8 text-center shadow-sm">
+      <div class="text-3xl mb-2 opacity-50">⚖️</div>
+      <p class="text-sm font-semibold text-slate-800 mb-1">A delicate balance</p>
+      <p class="text-xs text-slate-400 leading-relaxed mb-4">Click either side of the scale to explore how the Fed navigates its two competing mandates.</p>
+      <div class="flex gap-2 justify-center">
+        ${Object.values(MANDATES).map(m => `<div class="flex-1 p-3 rounded text-center" style="background:${m.cL};border:1px solid ${m.c}30">
+          <div class="text-xl mb-1">${m.icon}</div>
+          <div class="text-[0.76rem] font-bold" style="color:${m.cD}">${m.label}</div>
+          <div class="text-[0.64rem] text-slate-500 mt-0.5">${m.sub}</div>
         </div>`).join('')}
       </div>
-      <p style="font-size:0.74rem;color:#64748b;line-height:1.6;margin-top:0.8rem;padding:0.6rem;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">When the Fed lowers rates to boost jobs, it risks inflation. When it raises rates to fight inflation, it risks unemployment.</p>
+      <p class="text-[0.74rem] text-slate-500 leading-relaxed mt-3 px-2.5 py-2.5 bg-slate-50 rounded border border-gray-200">When the Fed lowers rates to boost jobs, it risks inflation. When it raises rates to fight inflation, it risks unemployment.</p>
     </div>`;
     const m = MANDATES[act];
-    return `<div style="background:white;border-radius:18px;padding:1.8rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid ${m.c}18;${fadeAnim()}">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem">
-        <span style="font-size:1.4rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:${m.cL};border-radius:12px">${m.icon}</span>
+    return `<div class="bg-white rounded p-7 shadow-md border" style="border-color:${m.c}18;${fadeAnim()}">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl w-11 h-11 flex items-center justify-center rounded" style="background:${m.cL}">${m.icon}</span>
         <div>
-          <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${m.c};margin:0">${m.label}</h3>
-          <span style="font-size:0.63rem;font-family:'JetBrains Mono',monospace;color:${m.cD};font-weight:500;background:${m.cL};padding:0.1rem 0.4rem;border-radius:5px">Target: ${m.target}</span>
+          <h3 class="font-bold text-[1.35rem] m-0" style="font-family:'Playfair Display',serif;color:${m.c}">${m.label}</h3>
+          <span class="text-[0.63rem] font-medium px-1.5 py-0.5 rounded" style="font-family:'JetBrains Mono',monospace;color:${m.cD};background:${m.cL}">Target: ${m.target}</span>
         </div>
       </div>
-      <p style="font-size:0.82rem;color:#475569;line-height:1.7;margin-bottom:0.8rem">${m.desc}</p>
-      <div style="background:${m.c}08;border:1px solid ${m.c}15;border-radius:12px;padding:0.75rem;margin-bottom:0.8rem">
+      <p class="text-[0.82rem] text-slate-600 leading-relaxed mb-3">${m.desc}</p>
+      <div class="rounded p-3 mb-3" style="background:${m.c}08;border:1px solid ${m.c}15">
         ${overline("Fed's Tools")}
-        ${m.tools.map(t => `<div style="display:flex;align-items:center;gap:0.35rem;padding:0.18rem 0"><span style="width:4px;height:4px;border-radius:50%;background:${m.c};flex-shrink:0;display:inline-block"></span><span style="font-size:0.75rem;color:#475569">${t}</span></div>`).join('')}
+        ${m.tools.map(t => `<div class="flex items-center gap-1.5 py-0.5"><span class="w-1 h-1 rounded-full flex-shrink-0 inline-block" style="background:${m.c}"></span><span class="text-xs text-slate-600">${t}</span></div>`).join('')}
       </div>
-      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:0.75rem;margin-bottom:0.8rem">
-        <p style="font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:#dc2626;margin-bottom:0.3rem">⚠️ The Tradeoff</p>
-        <p style="font-size:0.75rem;color:#7f1d1d;line-height:1.6">${m.tradeoff}</p>
+      <div class="rounded p-3 mb-3 bg-red-50 border border-red-200">
+        <p class="text-[0.6rem] font-semibold uppercase tracking-wider text-red-600 mb-1">⚠️ The Tradeoff</p>
+        <p class="text-[0.75rem] text-red-900 leading-relaxed">${m.tradeoff}</p>
       </div>
       ${overline('Key Metrics')}
-      <div style="display:flex;flex-wrap:wrap;gap:0.28rem">${m.metrics.map(x => pillTag(x, '#475569', '#f8fafc')).join('')}</div>
+      <div class="flex flex-wrap gap-1.5">${m.metrics.map(x => pillTag(x, '#475569', '#f8fafc')).join('')}</div>
     </div>`;
   }
 
   container.innerHTML = `${FADE_STYLE}
-    <div style="display:flex;gap:2rem;align-items:center;justify-content:center;flex-wrap:wrap">
-      <div id="dm-scale" style="flex:1 1 460px;max-width:540px">${buildScale()}</div>
-      <div style="flex:1 1 280px;max-width:340px"><div id="dm-detail">${buildDetail()}</div></div>
+    <div class="flex gap-8 items-center justify-center flex-wrap">
+      <div id="dm-scale" class="flex-1 basis-[460px] max-w-[540px]">${buildScale()}</div>
+      <div class="flex-1 basis-72 max-w-sm"><div id="dm-detail">${buildDetail()}</div></div>
     </div>`;
 
   function startTilt() {
@@ -580,7 +586,7 @@ CS_RENDERERS.rateTimeline = function(container) {
         <circle cx="${pos.x}" cy="${pos.y}" r="${isAct?8:6}" fill="${p.c}" stroke="white" stroke-width="2.5"/>
       </g>`;
     }).join('');
-    return `<div style="background:white;border-radius:24px;padding:1.2rem 1.2rem 0.6rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 32px rgba(0,0,0,0.06);border:1px solid #e2e8f0">
+    return `<div class="bg-white rounded border border-gray-200 shadow-sm pt-4 px-4 pb-2">
       <svg viewBox="0 0 ${SW} ${SH}" width="100%" style="display:block;overflow:visible">
         <defs>
           <linearGradient id="rtGrad" x1="0" y1="0" x2="1" y2="0">
@@ -603,46 +609,46 @@ CS_RENDERERS.rateTimeline = function(container) {
         </g>
         ${dots}
       </svg>
-      <div style="display:flex;justify-content:center;gap:0.5rem;margin-top:0.3rem;padding-top:0.6rem;border-top:1px solid #f1f5f9;flex-wrap:wrap">
-        ${PH.map((p,i) => `<button class="rt-btn" data-i="${i}" style="display:flex;align-items:center;gap:0.3rem;padding:0.38rem 0.7rem;border-radius:7px;border:${act===i?`2px solid ${p.c}`:'2px solid transparent'};background:${act===i?p.cL:'transparent'};cursor:pointer">
-          <span style="font-size:0.72rem">${p.icon}</span>
-          <span style="font-size:0.74rem;font-weight:600;color:${act===i?p.dk:'#64748b'}">${p.n}</span>
+      <div class="flex justify-center gap-2 mt-1 pt-2 border-t border-slate-100 flex-wrap">
+        ${PH.map((p,i) => `<button class="rt-btn flex items-center gap-1 px-2.5 py-1.5 rounded-lg cursor-pointer" data-i="${i}" style="border:${act===i?`2px solid ${p.c}`:'2px solid transparent'};background:${act===i?p.cL:'transparent'}">
+          <span class="text-sm">${p.icon}</span>
+          <span class="text-[0.74rem] font-semibold" style="color:${act===i?p.dk:'#64748b'}">${p.n}</span>
         </button>`).join('')}
       </div>
-      <p style="text-align:center;font-size:0.7rem;color:#94a3b8;font-style:italic;margin-top:0.5rem">Rates cycle between low (spring) and high (winter)</p>
+      <p class="text-center text-[0.7rem] text-slate-400 italic mt-2">Rates cycle between low (spring) and high (winter)</p>
     </div>`;
   }
 
   function buildDetail() {
     if (act === null) return placeholder('📈','Explore each phase','Click on any point along the rate cycle to see the environment and investment strategy.');
     const p = PH[act];
-    return `<div style="background:white;border-radius:18px;padding:1.8rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid ${p.c}18;${fadeAnim()}">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem">
-        <span style="font-size:1.4rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:${p.cL};border-radius:12px">${p.icon}</span>
+    return `<div class="bg-white rounded p-7 shadow-md border" style="border-color:${p.c}18;${fadeAnim()}">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl w-11 h-11 flex items-center justify-center rounded" style="background:${p.cL}">${p.icon}</span>
         <div>
-          <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${p.c};margin:0">${p.n}</h3>
-          <span style="font-size:0.62rem;font-family:'JetBrains Mono',monospace;color:${p.dk};font-weight:500;background:${p.cL};padding:0.1rem 0.4rem;border-radius:5px">${p.rateAction}</span>
+          <h3 class="font-bold text-[1.35rem] m-0" style="font-family:'Playfair Display',serif;color:${p.c}">${p.n}</h3>
+          <span class="text-[0.62rem] font-medium px-1.5 py-0.5 rounded" style="font-family:'JetBrains Mono',monospace;color:${p.dk};background:${p.cL}">${p.rateAction}</span>
         </div>
       </div>
-      <p style="font-size:0.82rem;color:#475569;line-height:1.7;margin-bottom:0.8rem">${p.desc}</p>
-      <div style="background:${p.c}08;border:1px solid ${p.c}15;border-radius:10px;padding:0.5rem 0.65rem;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.45rem">
-        <span style="font-size:0.82rem">📍</span>
+      <p class="text-[0.82rem] text-slate-600 leading-relaxed mb-3">${p.desc}</p>
+      <div class="rounded-lg p-2.5 mb-3 flex items-center gap-2" style="background:${p.c}08;border:1px solid ${p.c}15">
+        <span class="text-sm">📍</span>
         <div>
-          <span style="font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:${p.c}">Rate Position</span>
-          <div style="font-size:0.76rem;color:#475569;font-weight:500">${p.rateRange}</div>
+          <span class="text-[0.6rem] font-semibold uppercase tracking-wider" style="color:${p.c}">Rate Position</span>
+          <div class="text-[0.76rem] text-slate-600 font-medium">${p.rateRange}</div>
         </div>
       </div>
       ${overline('Environment')}
-      <div style="display:flex;flex-wrap:wrap;gap:0.28rem;margin-bottom:0.8rem">${p.env.map(e => pillTag(e, p.dk, p.cL)).join('')}</div>
+      <div class="flex flex-wrap gap-1.5 mb-3">${p.env.map(e => pillTag(e, p.dk, p.cL)).join('')}</div>
       ${overline('Strategy Playbook')}
-      <div style="display:flex;flex-direction:column;gap:0.25rem">${p.strat.map(s => factRow(s, p.c)).join('')}</div>
+      <div class="flex flex-col gap-1.5">${p.strat.map(s => factRow(s, p.c)).join('')}</div>
     </div>`;
   }
 
   container.innerHTML = `${FADE_STYLE}
-    <div style="display:flex;gap:2rem;align-items:center;justify-content:center;flex-wrap:wrap">
-      <div id="rt-chart" style="flex:1 1 520px;max-width:640px">${buildChart()}</div>
-      <div style="flex:1 1 280px;max-width:340px"><div id="rt-detail">${buildDetail()}</div></div>
+    <div class="flex gap-8 items-center justify-center flex-wrap">
+      <div id="rt-chart" class="flex-1 basis-[520px] max-w-[640px]">${buildChart()}</div>
+      <div class="flex-1 basis-72 max-w-sm"><div id="rt-detail">${buildDetail()}</div></div>
     </div>`;
 
   function toggle(i) {
@@ -729,24 +735,24 @@ CS_RENDERERS.creditSpread = function(container) {
     const maxRate = 12;
     const tW = (curTreasury/maxRate)*100, sW = (curSpread/maxRate)*100;
     const sColor = sc.id==='riskoff' ? '#ef4444' : sc.id==='riskon' ? '#10b981' : '#f97316';
-    return `<div style="background:white;border-radius:24px;padding:2rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 32px rgba(0,0,0,0.06);border:1px solid #e2e8f0">
-      <div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
-        <div class="cs-card" data-id="treasury" style="cursor:pointer;background:linear-gradient(135deg,#3b82f6,#2563eb);border-radius:14px;padding:1rem 1.4rem;text-align:center;min-width:118px;box-shadow:0 4px 12px rgba(59,130,246,0.25);transition:transform 0.2s;transform:${actComp==='treasury'?'scale(1.05)':'scale(1)'}">
+    return `<div class="bg-white rounded border border-gray-200 shadow-sm p-8">
+      <div class="flex items-center justify-center gap-3 mb-6 flex-wrap">
+        <div class="cs-card" data-id="treasury" style="cursor:pointer;background:linear-gradient(135deg,#3b82f6,#2563eb);border-radius:5px;padding:1rem 1.4rem;text-align:center;min-width:118px;box-shadow:0 4px 12px rgba(59,130,246,0.25);transition:transform 0.2s;transform:${actComp==='treasury'?'scale(1.05)':'scale(1)'}">
           <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:0.1rem">🏛️ Treasury</div>
           <div id="cs-tval" style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;color:white">${curTreasury.toFixed(1)}%</div>
         </div>
-        <div style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#94a3b8;flex-shrink:0">+</div>
-        <div class="cs-card" data-id="spread" style="cursor:pointer;background:linear-gradient(135deg,#f97316,#ea580c);border-radius:14px;padding:1rem 1.4rem;text-align:center;min-width:118px;box-shadow:0 4px 12px rgba(249,115,22,0.25);transition:transform 0.2s;transform:${actComp==='spread'?'scale(1.05)':'scale(1)'}">
+        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-base font-bold text-slate-400 flex-shrink-0">+</div>
+        <div class="cs-card" data-id="spread" style="cursor:pointer;background:linear-gradient(135deg,#f97316,#ea580c);border-radius:5px;padding:1rem 1.4rem;text-align:center;min-width:118px;box-shadow:0 4px 12px rgba(249,115,22,0.25);transition:transform 0.2s;transform:${actComp==='spread'?'scale(1.05)':'scale(1)'}">
           <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:0.1rem">⚡ Risk Premium</div>
           <div id="cs-sval" style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;color:white">${curSpread.toFixed(1)}%</div>
         </div>
-        <div style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#94a3b8;flex-shrink:0">=</div>
-        <div class="cs-card" data-id="corp" style="cursor:pointer;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:14px;padding:1rem 1.4rem;text-align:center;min-width:118px;box-shadow:0 4px 12px rgba(99,102,241,0.25);transition:transform 0.2s;transform:${actComp==='corp'?'scale(1.05)':'scale(1)'}">
+        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-base font-bold text-slate-400 flex-shrink-0">=</div>
+        <div class="cs-card" data-id="corp" style="cursor:pointer;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:5px;padding:1rem 1.4rem;text-align:center;min-width:118px;box-shadow:0 4px 12px rgba(99,102,241,0.25);transition:transform 0.2s;transform:${actComp==='corp'?'scale(1.05)':'scale(1)'}">
           <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:0.1rem">🏢 Corp Bond</div>
           <div id="cs-cval" style="font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;color:white">${(curTreasury+curSpread).toFixed(1)}%</div>
         </div>
       </div>
-      <div style="margin-bottom:1.4rem;padding:0 0.25rem">
+      <div class="mb-5 px-1">
         <div style="display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;background:#f8fafc">
           <div id="cs-tbar" style="width:${tW}%;background:linear-gradient(135deg,#3b82f6,#60a5fa);display:flex;align-items:center;justify-content:center;transition:width 0.6s cubic-bezier(0.4,0,0.2,1)">
             <span id="cs-tlabel" style="font-size:0.7rem;font-weight:700;color:white;font-family:'JetBrains Mono',monospace">${curTreasury.toFixed(1)}%</span>
@@ -755,73 +761,73 @@ CS_RENDERERS.creditSpread = function(container) {
             <span id="cs-slabel" style="font-size:0.7rem;font-weight:700;color:white;font-family:'JetBrains Mono',monospace">${curSpread.toFixed(1)}%</span>
           </div>
         </div>
-        <div style="display:flex;margin-top:0.3rem">
-          <div style="width:${tW}%;text-align:center;transition:width 0.6s;font-size:0.6rem;color:#3b82f6;font-weight:600">Treasury</div>
-          <div style="width:${sW}%;text-align:center;transition:width 0.6s;font-size:0.6rem;color:${sColor};font-weight:600">Spread</div>
+        <div class="flex mt-1">
+          <div class="text-center text-[0.6rem] text-blue-500 font-semibold transition-all" style="width:${tW}%">Treasury</div>
+          <div class="text-center text-[0.6rem] font-semibold transition-all" style="width:${sW}%;color:${sColor}">Spread</div>
         </div>
       </div>
-      <div style="display:flex;gap:0.45rem;justify-content:center;flex-wrap:wrap;margin-bottom:0.8rem">
-        ${SCENARIOS.map((s,i) => `<button class="cs-sc-btn" data-i="${i}" style="display:flex;align-items:center;gap:0.35rem;padding:0.5rem 0.9rem;border-radius:9px;border:${actSc===i?`2px solid ${s.c}`:'2px solid #e2e8f0'};background:${actSc===i?s.cL:'white'};cursor:pointer;transition:all 0.2s">
-          <span style="font-size:0.78rem">${s.icon}</span>
-          <div style="text-align:left">
-            <div style="font-size:0.76rem;font-weight:700;color:${actSc===i?(s.cD||s.c):'#334155'}">${s.label}</div>
-            ${s.sub ? `<div style="font-size:0.6rem;color:${actSc===i?(s.cD||s.c):'#94a3b8'};font-weight:500">${s.sub}</div>` : ''}
+      <div class="flex gap-2 justify-center flex-wrap mb-3">
+        ${SCENARIOS.map((s,i) => `<button class="cs-sc-btn flex items-center gap-1.5 px-3 py-2 rounded-lg cursor-pointer transition-all" data-i="${i}" style="border:${actSc===i?`2px solid ${s.c}`:'2px solid #e2e8f0'};background:${actSc===i?s.cL:'white'}">
+          <span class="text-sm">${s.icon}</span>
+          <div class="text-left">
+            <div class="text-[0.76rem] font-bold" style="color:${actSc===i?(s.cD||s.c):'#334155'}">${s.label}</div>
+            ${s.sub ? `<div class="text-[0.6rem] font-medium" style="color:${actSc===i?(s.cD||s.c):'#94a3b8'}">${s.sub}</div>` : ''}
           </div>
         </button>`).join('')}
       </div>
-      <p style="text-align:center;font-size:0.7rem;color:#94a3b8;font-style:italic">Wider = market fears defaults · Narrow = confidence is high</p>
+      <p class="text-center text-[0.7rem] text-slate-400 italic">Wider = market fears defaults · Narrow = confidence is high</p>
     </div>`;
   }
 
   function buildDetail() {
     if (actComp) {
       const c = COMPS[actComp];
-      return `<div style="background:white;border-radius:18px;padding:1.8rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid ${c.c}18;${fadeAnim()}">
-        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem">
-          <span style="font-size:1.4rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:${c.cL};border-radius:12px">${c.icon}</span>
+      return `<div class="bg-white rounded p-7 shadow-md border" style="border-color:${c.c}18;${fadeAnim()}">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-2xl w-11 h-11 flex items-center justify-center rounded" style="background:${c.cL}">${c.icon}</span>
           <div>
-            <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${c.c};margin:0">${c.label}</h3>
-            <span style="font-size:0.65rem;color:#94a3b8;font-weight:500">${c.sub}</span>
+            <h3 class="font-bold text-[1.35rem] m-0" style="font-family:'Playfair Display',serif;color:${c.c}">${c.label}</h3>
+            <span class="text-[0.65rem] text-slate-400 font-medium">${c.sub}</span>
           </div>
         </div>
-        <p style="font-size:0.82rem;color:#475569;line-height:1.7;margin-bottom:0.8rem">${c.desc}</p>
+        <p class="text-[0.82rem] text-slate-600 leading-relaxed mb-3">${c.desc}</p>
         ${overline('Key Drivers')}
-        <div style="display:flex;flex-direction:column;gap:0.25rem">${c.factors.map(f => factRow(f, c.c)).join('')}</div>
+        <div class="flex flex-col gap-1.5">${c.factors.map(f => factRow(f, c.c)).join('')}</div>
       </div>`;
     }
     const sc = SCENARIOS[actSc];
-    if (sc.id === 'normal') return `<div style="background:white;border-radius:18px;padding:2rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid #e2e8f0">
-      <div style="font-size:2rem;margin-bottom:0.6rem;opacity:0.5">💳</div>
-      <p style="font-size:0.88rem;font-weight:600;color:#334155;margin-bottom:0.3rem">Explore the spread</p>
-      <p style="font-size:0.79rem;color:#94a3b8;line-height:1.6;margin-bottom:1.2rem">Click any card in the equation to learn about each component, or toggle between scenarios to see how spreads react.</p>
-      <div style="padding:0.85rem;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;text-align:left">
+    if (sc.id === 'normal') return `<div class="bg-white rounded border border-gray-200 p-8 text-center shadow-sm">
+      <div class="text-3xl mb-2 opacity-50">💳</div>
+      <p class="text-sm font-semibold text-slate-800 mb-1">Explore the spread</p>
+      <p class="text-xs text-slate-400 leading-relaxed mb-4">Click any card in the equation to learn about each component, or toggle between scenarios to see how spreads react.</p>
+      <div class="px-3 py-2.5 rounded bg-slate-50 border border-gray-200 text-left">
         ${overline('The Formula')}
-        <div style="display:flex;align-items:center;gap:0.35rem;justify-content:center;padding:0.3rem 0">
-          <span style="font-size:0.76rem;font-weight:600;color:#3b82f6">🏛️ Treasury</span>
-          <span style="color:#cbd5e1">+</span>
-          <span style="font-size:0.76rem;font-weight:600;color:#f97316">⚡ Spread</span>
-          <span style="color:#cbd5e1">=</span>
-          <span style="font-size:0.76rem;font-weight:600;color:#6366f1">🏢 Corp Yield</span>
+        <div class="flex items-center gap-1.5 justify-center py-1">
+          <span class="text-[0.76rem] font-semibold text-blue-500">🏛️ Treasury</span>
+          <span class="text-gray-300">+</span>
+          <span class="text-[0.76rem] font-semibold text-orange-500">⚡ Spread</span>
+          <span class="text-gray-300">=</span>
+          <span class="text-[0.76rem] font-semibold text-indigo-500">🏢 Corp Yield</span>
         </div>
-        <div style="margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid #e2e8f0">
-          <div style="display:flex;justify-content:space-between;padding:0.2rem 0"><span style="font-size:0.7rem;color:#64748b">🟢 Risk-ON</span><span style="font-size:0.7rem;color:#10b981;font-weight:600">Spreads narrow</span></div>
-          <div style="display:flex;justify-content:space-between;padding:0.2rem 0"><span style="font-size:0.7rem;color:#64748b">🔴 Risk-OFF</span><span style="font-size:0.7rem;color:#ef4444;font-weight:600">Spreads widen</span></div>
+        <div class="mt-2 pt-2 border-t border-gray-200">
+          <div class="flex justify-between py-0.5"><span class="text-[0.7rem] text-slate-500">🟢 Risk-ON</span><span class="text-[0.7rem] text-emerald-500 font-semibold">Spreads narrow</span></div>
+          <div class="flex justify-between py-0.5"><span class="text-[0.7rem] text-slate-500">🔴 Risk-OFF</span><span class="text-[0.7rem] text-red-500 font-semibold">Spreads widen</span></div>
         </div>
       </div>
     </div>`;
-    return `<div style="background:white;border-radius:18px;padding:1.8rem;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.06);border:1px solid ${sc.c}18;${fadeAnim()}">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem">
-        <span style="font-size:1.4rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:${sc.cL};border-radius:12px">${sc.icon}</span>
+    return `<div class="bg-white rounded p-7 shadow-md border" style="border-color:${sc.c}18;${fadeAnim()}">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl w-11 h-11 flex items-center justify-center rounded" style="background:${sc.cL}">${sc.icon}</span>
         <div>
-          <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${sc.c};margin:0">${sc.label}</h3>
-          <span style="font-size:0.62rem;font-family:'JetBrains Mono',monospace;color:${sc.cD};font-weight:500;background:${sc.cL};padding:0.1rem 0.4rem;border-radius:5px">Spread: ${sc.spread.toFixed(1)}% · ${sc.sentiment}</span>
+          <h3 class="font-bold text-[1.35rem] m-0" style="font-family:'Playfair Display',serif;color:${sc.c}">${sc.label}</h3>
+          <span class="text-[0.62rem] font-medium px-1.5 py-0.5 rounded" style="font-family:'JetBrains Mono',monospace;color:${sc.cD};background:${sc.cL}">Spread: ${sc.spread.toFixed(1)}% · ${sc.sentiment}</span>
         </div>
       </div>
-      <p style="font-size:0.82rem;color:#475569;line-height:1.7;margin-bottom:0.8rem">${sc.desc}</p>
+      <p class="text-[0.82rem] text-slate-600 leading-relaxed mb-3">${sc.desc}</p>
       ${overline('Environment')}
-      <div style="display:flex;flex-wrap:wrap;gap:0.28rem;margin-bottom:0.8rem">${sc.env.map(e => pillTag(e, sc.cD, sc.cL)).join('')}</div>
+      <div class="flex flex-wrap gap-1.5 mb-3">${sc.env.map(e => pillTag(e, sc.cD, sc.cL)).join('')}</div>
       ${overline('What to Watch')}
-      <div style="display:flex;flex-direction:column;gap:0.25rem">${sc.sigs.map(s => factRow(s, sc.c)).join('')}</div>
+      <div class="flex flex-col gap-1.5">${sc.sigs.map(s => factRow(s, sc.c)).join('')}</div>
     </div>`;
   }
 
@@ -833,9 +839,9 @@ CS_RENDERERS.creditSpread = function(container) {
   }
 
   container.innerHTML = `${FADE_STYLE}
-    <div style="display:flex;gap:2rem;align-items:center;justify-content:center;flex-wrap:wrap">
-      <div id="cs-diagram" style="flex:1 1 480px;max-width:580px">${buildDiagram()}</div>
-      <div style="flex:1 1 280px;max-width:340px"><div id="cs-detail">${buildDetail()}</div></div>
+    <div class="flex gap-8 items-center justify-center flex-wrap">
+      <div id="cs-diagram" class="flex-1 basis-[480px] max-w-[580px]">${buildDiagram()}</div>
+      <div class="flex-1 basis-72 max-w-sm"><div id="cs-detail">${buildDetail()}</div></div>
     </div>`;
 
   function bindAll() {
@@ -901,32 +907,35 @@ function renderIndicators() {
            {r:'Shrinking (QT)', m:'Autumn — tightening, draining liquidity from system'}],
       signals:'Policy direction confirmation', redFlag:'Rapid contraction > $100B/month' },
   ];
-  grid.innerHTML = INDS.map(ind => `<div style="background:white;border-radius:16px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.04);overflow:hidden">
-    <div style="background:${ind.bg};padding:0.85rem 1.2rem;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:0.6rem">
-      <span style="font-size:1.3rem">${ind.icon}</span>
-      <h3 style="font-size:0.93rem;font-weight:700;color:#0f172a;margin:0;font-family:'DM Sans',sans-serif">${ind.name}</h3>
-    </div>
-    <div style="padding:1rem 1.2rem">
-      <p style="font-size:0.77rem;color:#64748b;margin-bottom:0.8rem;line-height:1.5">${ind.what}</p>
-      <p style="font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.15em;color:#94a3b8;margin-bottom:0.4rem">How to Read It</p>
-      <div style="display:flex;flex-direction:column;gap:0.22rem;margin-bottom:0.8rem">
-        ${ind.how.map(h => `<div style="display:flex;align-items:flex-start;gap:0.5rem">
-          <span style="font-size:0.64rem;font-family:'JetBrains Mono',monospace;font-weight:600;color:${ind.color};background:${ind.bg};padding:0.15rem 0.4rem;border-radius:5px;white-space:nowrap;flex-shrink:0">${h.r}</span>
-          <span style="font-size:0.73rem;color:#475569;line-height:1.4">${h.m}</span>
-        </div>`).join('')}
+  grid.innerHTML = INDS.map(ind => {
+    // Map the fixed indicator bg/color to Tailwind — keep only color inline since values are arbitrary hex
+    const howRows = ind.how.map(h => `
+      <div class="flex items-start gap-2">
+        <span class="text-[0.64rem] font-semibold whitespace-nowrap flex-shrink-0 px-1.5 py-0.5 rounded" style="font-family:'JetBrains Mono',monospace;color:${ind.color};background:${ind.bg}">${h.r}</span>
+        <span class="text-[0.73rem] text-slate-600 leading-snug">${h.m}</span>
+      </div>`).join('');
+    return `<div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-3 border-b border-gray-200 flex items-center gap-2" style="background:${ind.bg}">
+        <span class="text-xl">${ind.icon}</span>
+        <h3 class="text-sm font-bold text-slate-900">${ind.name}</h3>
       </div>
-      <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:0.3rem">
-          <span style="font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8">Signals:</span>
-          <span style="font-size:0.68rem;font-weight:600;color:${ind.color}">${ind.signals}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:0.3rem">
-          <span style="font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8">🚨</span>
-          <span style="font-size:0.68rem;color:#ef4444">${ind.redFlag}</span>
+      <div class="px-5 py-4">
+        <p class="text-[0.77rem] text-slate-500 mb-3 leading-relaxed">${ind.what}</p>
+        <p class="text-[0.62rem] font-semibold uppercase tracking-widest text-slate-400 mb-2">How to Read It</p>
+        <div class="flex flex-col gap-1.5 mb-3">${howRows}</div>
+        <div class="flex gap-4 items-center flex-wrap">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[0.6rem] font-semibold uppercase tracking-wider text-slate-400">Signals:</span>
+            <span class="text-[0.68rem] font-semibold" style="color:${ind.color}">${ind.signals}</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[0.6rem] font-semibold uppercase tracking-wider text-slate-400">🚨</span>
+            <span class="text-[0.68rem] text-red-500">${ind.redFlag}</span>
+          </div>
         </div>
       </div>
-    </div>
-  </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ─── 8 PHASES GRID ────────────────────────────────────────────────────────────
@@ -943,40 +952,40 @@ async function renderPhases(currentSeasonData) {
     console.error('Failed to load phases:', e);
   }
   if (!phases) {
-    grid.innerHTML = '<div style="grid-column:span 2;text-align:center;color:#94a3b8;padding:2rem">Could not load phase data.</div>';
+    grid.innerHTML = '<div class="col-span-2 text-center text-slate-400 py-8">Could not load phase data.</div>';
     return;
   }
-  const SC = { spring:'#10b981', summer:'#eab308', autumn:'#f97316', winter:'#3b82f6' };
-  const BG = { spring:'#ecfdf5', summer:'#fefce8', autumn:'#fff7ed', winter:'#eff6ff' };
   const ICON = { spring:'🌱', summer:'☀️', autumn:'🍂', winter:'❄️' };
   const currentKey = currentSeasonData ? `${currentSeasonData.season}-${currentSeasonData.phase}` : null;
   grid.innerHTML = phases.map(p => {
-    const c = SC[p.season] || '#64748b';
-    const bg = BG[p.season] || '#f8fafc';
     const icon = ICON[p.season] || '📊';
     const isCurrent = currentKey === `${p.season}-${p.phase}`;
     const topSectors = (p.sectors||[]).filter(s => s.weight === 'overweight').slice(0,3);
-    return `<div style="background:white;border-radius:16px;border:${isCurrent?`2px solid ${c}`:'1px solid #e2e8f0'};box-shadow:0 1px 3px rgba(0,0,0,0.04)${isCurrent?`,0 0 0 4px ${c}12`:''};overflow:hidden">
-      <div style="background:${c};padding:0.85rem 1.2rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:0.5rem">
-          <span style="font-size:1.2rem">${icon}</span>
+    const phaseName = `${p.phase.charAt(0).toUpperCase()+p.phase.slice(1)} ${p.season.charAt(0).toUpperCase()+p.season.slice(1)}`;
+    const sectorPills = topSectors.length
+      ? topSectors.map(s => `<span class="px-2 py-0.5 rounded-full text-[0.67rem] font-medium ${PILL_CLS[p.season]||'bg-slate-100 text-slate-600'}">${s.name}</span>`).join('')
+      : '<span class="text-[0.7rem] text-slate-400">—</span>';
+    return `<div class="bg-white rounded overflow-hidden shadow-sm ${isCurrent ? RING_CLS[p.season]||'ring-2 ring-slate-400' : 'border border-gray-200'}">
+      <div class="px-5 py-3 flex items-center justify-between ${SC_CLS[p.season]||'bg-slate-500'}">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">${icon}</span>
           <div>
-            <div style="font-size:0.9rem;font-weight:700;color:white;font-family:'Playfair Display',Georgia,serif">${p.phase.charAt(0).toUpperCase()+p.phase.slice(1)} ${p.season.charAt(0).toUpperCase()+p.season.slice(1)}</div>
-            <div style="font-size:0.62rem;color:rgba(255,255,255,0.8);font-weight:500">${p.setup||''}</div>
+            <div class="text-sm font-bold text-white" style="font-family:'Playfair Display',serif">${phaseName}</div>
+            <div class="text-[0.62rem] text-white/80 font-medium">${p.setup||''}</div>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.22rem">
-          ${isCurrent ? `<span style="background:white;color:${c};font-size:0.58rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:20px;letter-spacing:0.08em">CURRENT</span>` : ''}
-          <span style="background:rgba(0,0,0,0.18);color:white;font-size:0.58rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:20px">${p.riskLevel||''}</span>
+        <div class="flex flex-col items-end gap-1">
+          ${isCurrent ? `<span class="bg-white text-[0.58rem] font-bold px-2 py-0.5 rounded-full ${TEXT_CLS[p.season]||'text-slate-600'}">CURRENT</span>` : ''}
+          <span class="bg-black/20 text-white text-[0.58rem] font-semibold px-2 py-0.5 rounded-full">${p.riskLevel||''}</span>
         </div>
       </div>
-      <div style="padding:1rem 1.2rem">
-        <p style="font-size:0.77rem;color:#475569;line-height:1.5;margin-bottom:0.75rem">${p.setupDescription||''}</p>
-        <p style="font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.15em;color:#94a3b8;margin-bottom:0.35rem">Top Sectors</p>
-        <div style="display:flex;flex-wrap:wrap;gap:0.25rem;margin-bottom:0.6rem">${topSectors.length ? topSectors.map(s => `<span style="padding:0.18rem 0.5rem;border-radius:20px;font-size:0.67rem;font-weight:500;background:${bg};color:${c}">${s.name}</span>`).join('') : '<span style="font-size:0.7rem;color:#94a3b8">—</span>'}</div>
-        <div style="display:flex;gap:0.35rem;align-items:center;flex-wrap:wrap">
-          <span style="font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8">Analog:</span>
-          <span style="font-size:0.67rem;color:#64748b">${p.historicalAnalog||'—'}</span>
+      <div class="p-4">
+        <p class="text-[0.77rem] text-slate-600 leading-relaxed mb-3">${p.setupDescription||''}</p>
+        <p class="text-[0.6rem] font-semibold uppercase tracking-widest text-slate-400 mb-1.5">Top Sectors</p>
+        <div class="flex flex-wrap gap-1 mb-2.5">${sectorPills}</div>
+        <div class="flex gap-1.5 items-center flex-wrap">
+          <span class="text-[0.6rem] font-semibold uppercase tracking-wider text-slate-400">Analog:</span>
+          <span class="text-[0.67rem] text-slate-500">${p.historicalAnalog||'—'}</span>
         </div>
       </div>
     </div>`;
@@ -995,41 +1004,54 @@ async function renderAllocations() {
     phases = data.phases;
   } catch {}
   if (!phases) {
-    grid.innerHTML = '<div style="grid-column:span 2;text-align:center;color:#94a3b8;padding:2rem">Could not load allocation data.</div>';
+    grid.innerHTML = '<div class="col-span-2 text-center text-slate-400 py-8">Could not load allocation data.</div>';
     return;
   }
-  const SC = { spring:'#10b981', summer:'#eab308', autumn:'#f97316', winter:'#3b82f6' };
+  // Fixed allocation segment colors mapped to Tailwind
+  const BAR_CLS = {
+    Equities: { bar:'bg-blue-500',   dot:'bg-blue-500',   text:'text-blue-500'   },
+    Bonds:    { bar:'bg-emerald-500', dot:'bg-emerald-500', text:'text-emerald-600' },
+    Cash:     { bar:'bg-yellow-400', dot:'bg-yellow-400', text:'text-yellow-600' },
+    Alts:     { bar:'bg-violet-500', dot:'bg-violet-500', text:'text-violet-600' },
+  };
   grid.innerHTML = phases.map(p => {
-    const c = SC[p.season] || '#64748b';
     const alloc = p.allocation || {};
     const bars = [
-      { label:'Equities', pct: alloc.equities?.pct || 0, detail: alloc.equities?.detail || '', c:'#3b82f6' },
-      { label:'Bonds',    pct: alloc.bonds?.pct    || 0, detail: alloc.bonds?.detail    || '', c:'#10b981' },
-      { label:'Cash',     pct: alloc.cash?.pct     || 0, detail: alloc.cash?.detail     || '', c:'#eab308' },
-      { label:'Alts',     pct: alloc.alts?.pct     || 0, detail: alloc.alts?.detail     || '', c:'#8b5cf6' },
+      { label:'Equities', pct: alloc.equities?.pct || 0, detail: alloc.equities?.detail || '' },
+      { label:'Bonds',    pct: alloc.bonds?.pct    || 0, detail: alloc.bonds?.detail    || '' },
+      { label:'Cash',     pct: alloc.cash?.pct     || 0, detail: alloc.cash?.detail     || '' },
+      { label:'Alts',     pct: alloc.alts?.pct     || 0, detail: alloc.alts?.detail     || '' },
     ];
-    return `<div style="background:white;border-radius:16px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.04);overflow:hidden">
-      <div style="padding:0.75rem 1.2rem;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:0.88rem;font-weight:700;color:#0f172a">${p.phase.charAt(0).toUpperCase()+p.phase.slice(1)} ${p.season.charAt(0).toUpperCase()+p.season.slice(1)}</div>
-        <span style="font-size:0.65rem;font-weight:600;color:${c};background:${c}15;padding:0.15rem 0.45rem;border-radius:20px">${p.riskLevel||''}</span>
+    const phaseName = `${p.phase.charAt(0).toUpperCase()+p.phase.slice(1)} ${p.season.charAt(0).toUpperCase()+p.season.slice(1)}`;
+    const riskBadge = `<span class="text-[0.65rem] font-semibold px-2 py-0.5 rounded-full ${PILL_CLS[p.season]||'bg-slate-100 text-slate-600'}">${p.riskLevel||''}</span>`;
+    const barSegments = bars.filter(b => b.pct > 0).map(b => {
+      const cls = BAR_CLS[b.label];
+      return `<div class="${cls.bar} flex items-center justify-center" style="width:${b.pct}%" title="${b.label}: ${b.pct}%">
+        ${b.pct >= 12 ? `<span class="text-[0.58rem] font-bold text-white">${b.pct}%</span>` : ''}
+      </div>`;
+    }).join('');
+    const legend = bars.filter(b => b.pct > 0).map(b => {
+      const cls = BAR_CLS[b.label];
+      return `<div class="flex items-center gap-1">
+        <span class="w-2 h-2 rounded-sm inline-block ${cls.dot}"></span>
+        <span class="text-[0.67rem] text-slate-500 font-medium">${b.label} <strong class="text-slate-800">${b.pct}%</strong></span>
+      </div>`;
+    }).join('');
+    const details = bars.filter(b => b.pct > 0 && b.detail).map(b => {
+      const cls = BAR_CLS[b.label];
+      return `<div class="text-[0.67rem] text-slate-500 leading-snug"><strong class="${cls.text}">${b.label}:</strong> ${b.detail}</div>`;
+    }).join('');
+    return `<div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-2.5 border-b border-slate-100 flex items-center justify-between">
+        <div class="text-sm font-bold text-slate-900">${phaseName}</div>
+        ${riskBadge}
       </div>
-      <div style="padding:0.85rem 1.2rem">
-        <div style="display:flex;height:26px;border-radius:7px;overflow:hidden;margin-bottom:0.55rem">
-          ${bars.filter(b => b.pct > 0).map(b => `<div style="width:${b.pct}%;background:${b.c};display:flex;align-items:center;justify-content:center" title="${b.label}: ${b.pct}%">
-            ${b.pct >= 12 ? `<span style="font-size:0.58rem;font-weight:700;color:white">${b.pct}%</span>` : ''}
-          </div>`).join('')}
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:0.45rem;margin-bottom:0.65rem">
-          ${bars.filter(b => b.pct > 0).map(b => `<div style="display:flex;align-items:center;gap:0.25rem">
-            <span style="width:8px;height:8px;border-radius:2px;background:${b.c};display:inline-block"></span>
-            <span style="font-size:0.67rem;color:#64748b;font-weight:500">${b.label} <strong style="color:#334155">${b.pct}%</strong></span>
-          </div>`).join('')}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:0.22rem">
-          ${bars.filter(b => b.pct > 0 && b.detail).map(b => `<div style="font-size:0.67rem;color:#64748b;line-height:1.4"><strong style="color:${b.c}">${b.label}:</strong> ${b.detail}</div>`).join('')}
-        </div>
-        ${p.equityStyle ? `<div style="margin-top:0.5rem;padding:0.38rem 0.6rem;background:#f8fafc;border-radius:7px;font-size:0.67rem;color:#475569"><strong>Style:</strong> ${p.equityStyle}</div>` : ''}
-        ${p.bondDuration ? `<div style="margin-top:0.22rem;padding:0.38rem 0.6rem;background:#f8fafc;border-radius:7px;font-size:0.67rem;color:#475569"><strong>Duration:</strong> ${p.bondDuration}</div>` : ''}
+      <div class="px-5 py-3">
+        <div class="flex h-6 rounded overflow-hidden mb-2">${barSegments}</div>
+        <div class="flex flex-wrap gap-2 mb-2.5">${legend}</div>
+        <div class="flex flex-col gap-1">${details}</div>
+        ${p.equityStyle ? `<div class="mt-2 px-2.5 py-1.5 bg-slate-50 rounded text-[0.67rem] text-slate-600"><strong>Style:</strong> ${p.equityStyle}</div>` : ''}
+        ${p.bondDuration ? `<div class="mt-1 px-2.5 py-1.5 bg-slate-50 rounded text-[0.67rem] text-slate-600"><strong>Duration:</strong> ${p.bondDuration}</div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1058,31 +1080,42 @@ function renderHistory() {
       stats:[{k:'Rate range',v:'0.25% → 5.5% in 2 yrs'},{k:'CPI peak',v:'9.1% (Jun 2022)'},{k:'QE peak',v:'$9T balance sheet'},{k:'S&P 2020–21',v:'+116% from trough'}],
       lesson:'The fastest rate hiking cycle since the 1980s followed the most extreme stimulus ever deployed. V-shape recoveries reward aggressive risk-taking early. The inflation lag from fiscal + monetary policy was badly underestimated.' },
   ];
-  const SC = { spring:'#10b981', summer:'#eab308', autumn:'#f97316', winter:'#3b82f6' };
-  grid.innerHTML = EXAMPLES.map(ex => `<div style="background:white;border-radius:16px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.04);overflow:hidden">
-    <div style="background:${ex.color};padding:0.85rem 1.2rem;display:flex;align-items:center;gap:0.5rem">
-      <span style="font-size:1.3rem">${ex.icon}</span>
-      <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:0.95rem;font-weight:700;color:white;margin:0">${ex.title}</h3>
-    </div>
-    <div style="padding:1rem 1.2rem">
-      <div style="display:flex;gap:0.22rem;margin-bottom:0.9rem;align-items:center;flex-wrap:wrap">
-        ${ex.timeline.map((t,i) => `${i>0?'<span style="color:#e2e8f0;font-size:0.7rem">→</span>':''}<div style="flex:1;min-width:52px;background:${SC[t.s]||'#94a3b8'};border-radius:5px;padding:0.2rem 0.3rem;text-align:center">
-          <div style="font-size:0.55rem;color:rgba(255,255,255,0.85);font-weight:600;white-space:nowrap">${t.y}</div>
-          <div style="font-size:0.52rem;color:white;font-weight:700;white-space:nowrap">${t.l}</div>
-        </div>`).join('')}
+  // Map each fixed example color to Tailwind header + lesson box classes
+  const EX_CLS = [
+    { header:'bg-green-500',  lesson:'bg-green-50 border-green-200',  lessonTxt:'text-green-700'  },
+    { header:'bg-orange-500', lesson:'bg-orange-50 border-orange-200', lessonTxt:'text-orange-700' },
+    { header:'bg-blue-500',   lesson:'bg-blue-50 border-blue-200',     lessonTxt:'text-blue-700'   },
+    { header:'bg-violet-500', lesson:'bg-violet-50 border-violet-200', lessonTxt:'text-violet-700' },
+  ];
+  const SC_CLS_H = { spring:'bg-emerald-500', summer:'bg-yellow-400', autumn:'bg-orange-500', winter:'bg-blue-500' };
+  grid.innerHTML = EXAMPLES.map((ex, ei) => {
+    const ecls = EX_CLS[ei] || { header:'bg-slate-500', lesson:'bg-slate-50 border-slate-200', lessonTxt:'text-slate-700' };
+    const timeline = ex.timeline.map((t,i) => `
+      ${i > 0 ? '<span class="text-gray-300 text-xs">→</span>' : ''}
+      <div class="flex-1 min-w-[52px] ${SC_CLS_H[t.s]||'bg-slate-400'} rounded py-0.5 px-1 text-center">
+        <div class="text-[0.55rem] text-white/85 font-semibold whitespace-nowrap">${t.y}</div>
+        <div class="text-[0.52rem] text-white font-bold whitespace-nowrap">${t.l}</div>
+      </div>`).join('');
+    const stats = ex.stats.map(s => `
+      <div class="bg-slate-50 border border-gray-200 rounded px-2.5 py-1.5">
+        <div class="text-[0.57rem] font-semibold uppercase tracking-wider text-slate-400">${s.k}</div>
+        <div class="text-[0.76rem] font-bold text-slate-900" style="font-family:'JetBrains Mono',monospace">${s.v}</div>
+      </div>`).join('');
+    return `<div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+      <div class="${ecls.header} px-5 py-3 flex items-center gap-2">
+        <span class="text-xl">${ex.icon}</span>
+        <h3 class="text-sm font-bold text-white" style="font-family:'Playfair Display',serif">${ex.title}</h3>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.32rem;margin-bottom:0.8rem">
-        ${ex.stats.map(s => `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:0.38rem 0.6rem">
-          <div style="font-size:0.57rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8">${s.k}</div>
-          <div style="font-size:0.76rem;font-weight:700;color:#0f172a;font-family:'JetBrains Mono',monospace">${s.v}</div>
-        </div>`).join('')}
+      <div class="px-5 py-4">
+        <div class="flex gap-1 mb-3.5 items-center flex-wrap">${timeline}</div>
+        <div class="grid grid-cols-2 gap-1.5 mb-3">${stats}</div>
+        <div class="${ecls.lesson} rounded-lg px-3 py-2.5 border">
+          <p class="text-[0.6rem] font-semibold uppercase tracking-wider ${ecls.lessonTxt} mb-1">💡 Key Lesson</p>
+          <p class="text-[0.75rem] text-slate-600 leading-relaxed">${ex.lesson}</p>
+        </div>
       </div>
-      <div style="background:${ex.bg};border-radius:10px;padding:0.65rem 0.8rem;border:1px solid ${ex.color}22">
-        <p style="font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:${ex.color};margin-bottom:0.3rem">💡 Key Lesson</p>
-        <p style="font-size:0.75rem;color:#475569;line-height:1.55">${ex.lesson}</p>
-      </div>
-    </div>
-  </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ─── GLOSSARY ─────────────────────────────────────────────────────────────────
@@ -1129,7 +1162,7 @@ function renderGlossary(terms) {
 function setupScrollNav() {
   const links = document.querySelectorAll('#learn-nav .learn-nav-link');
   if (!links.length) return;
-  const sections = ['section-cheatsheets','section-indicators','section-phases','section-allocations','section-history','section-glossary'];
+  const sections = ['section-cheatsheets','section-indicators','section-phases','section-allocations','section-history','section-videos','section-glossary'];
   function updateActive() {
     const scrollY = window.scrollY + 220;
     let current = sections[0];
@@ -1162,6 +1195,145 @@ async function loadTheme() {
   }
 }
 
+// ─── VIDEO LIBRARY ────────────────────────────────────────────────────────────
+
+const VIDEO_LIBRARY = [
+  {
+    cat: 'macro', label: '📊 Macro & Cycles',
+    videos: [
+      { title: 'How the Economic Machine Works', channel: 'Ray Dalio / Bridgewater', duration: '31 min', id: 'PHe0bXAIuk0', note: 'The single best intro to macro. Watch this first.' },
+      { title: 'Principles: Changing World Order', channel: 'Principles by Ray Dalio', duration: '44 min', id: 'xguam0TKMw8', note: 'Rise and fall of empires, debt supercycles, US dollar reserve status, and what comes next.' },
+      { title: 'Open Market Operations & Quantitative Easing', channel: 'Khan Academy', duration: '~10 min', id: 'TpLlJ8-AnQM', note: 'How the Fed buys/sells bonds to control money supply. QE vs QT explained.' },
+      { title: 'Business Cycle Explained', channel: 'Various Educators', duration: '~10 min', search: 'business+cycle+explained+macroeconomics+expansion+recession', note: 'Expansion, peak, contraction, trough — the four phases in plain English.' },
+    ]
+  },
+  {
+    cat: 'valuation', label: '📐 Valuation',
+    videos: [
+      { title: 'Introduction to Valuation', channel: 'Aswath Damodaran / NYU Stern', duration: '~60 min', id: 'znmQ7oMiQrM', note: 'Session 1 of Damodaran\'s free valuation course. Intrinsic vs relative value, the foundations of DCF.' },
+      { title: 'What is the P/E Ratio?', channel: 'The Plain Bagel', duration: '~12 min', search: 'plain+bagel+PE+ratio+explained+price+to+earnings', note: 'Price-to-earnings, cyclically adjusted PE (CAPE/Shiller PE), and why it matters for timing.' },
+      { title: 'EV/EBITDA and Enterprise Value', channel: 'Various', duration: '~10 min', search: 'EV+EBITDA+enterprise+value+explained+valuation+multiples', note: 'The enterprise value multiples used by professional investors and M&A analysts.' },
+      { title: 'Dividend Yield and Income Investing', channel: 'Various', duration: '~15 min', search: 'dividend+yield+payout+ratio+income+stock+valuation', note: 'Dividend yield, payout ratio, dividend growth rate — valuing income-generating stocks.' },
+    ]
+  },
+  {
+    cat: 'books', label: '📚 Book Cliff Notes',
+    videos: [
+      { title: 'The Intelligent Investor — Full Summary', channel: 'The Swedish Investor', duration: '~16 min', id: 'npoyc_X5zO8', note: 'Graham\'s value investing framework, Mr. Market, margin of safety — in 16 minutes.' },
+      { title: 'Principles for Success — Episode 1', channel: 'Principles by Ray Dalio', duration: '5 min', id: 'dKz095P7LdU', note: 'Ray Dalio\'s animated mini-series. The "5-step process", radical open-mindedness, and pain + reflection = progress.' },
+      { title: 'A Random Walk Down Wall Street', channel: 'Various', duration: '~15 min', search: 'random+walk+down+wall+street+malkiel+summary+index+funds', note: 'Burton Malkiel\'s case for index funds, the EMH, and why active stock picking is so hard.' },
+      { title: 'The Little Book of Common Sense Investing', channel: 'Various', duration: '~10 min', search: 'little+book+common+sense+investing+bogle+index+fund+summary', note: 'John Bogle\'s case for low-cost index funds. The math of compounding costs over decades.' },
+    ]
+  },
+  {
+    cat: 'rates', label: '🏛️ Fixed Income & Rates',
+    videos: [
+      { title: 'Introduction to Bonds', channel: 'Khan Academy', duration: '~10 min', id: 'Qh-M3_L4xYk', note: 'Face value, coupon, yield, duration — bonds from scratch. Why bond prices move opposite to yields.' },
+      { title: 'The Yield Curve Explained', channel: 'Various', duration: '~10 min', search: 'yield+curve+explained+normal+inverted+recession+treasury', note: 'Normal, flat, inverted — and why yield curve inversion has predicted every recent recession.' },
+      { title: 'Why the Fed Raises Interest Rates', channel: 'CNBC / Federal Reserve', duration: '~5 min', search: 'why+fed+raises+interest+rates+inflation+monetary+policy+explained', note: 'The inflation → rate hike → credit crunch transmission mechanism, explained simply.' },
+      { title: 'High Yield Bonds and Credit Spreads', channel: 'Various', duration: '~10 min', search: 'high+yield+junk+bonds+credit+spreads+explained+risk+premium', note: 'Junk bond premiums, what widening credit spreads signal about recession risk.' },
+    ]
+  },
+  {
+    cat: 'crypto', label: '₿ Crypto in Macro',
+    videos: [
+      { title: 'But how does Bitcoin actually work?', channel: '3Blue1Brown', duration: '26 min', id: 'bBC-nXj3Ng4', note: 'The best technical explainer of Bitcoin\'s cryptographic foundations. Zero jargon.' },
+      { title: 'Bitcoin as a Macro Asset — Lyn Alden', channel: 'Coin Stories', duration: '~60 min', id: 'IebP5M4JLyA', note: 'Lyn Alden explains Bitcoin\'s role in macro: liquidity cycles, digital gold thesis, institutional adoption.' },
+      { title: 'Why Institutions Buy Bitcoin', channel: 'Various', duration: '~15 min', search: 'why+institutions+buy+bitcoin+ETF+BlackRock+treasury+reserve', note: 'BlackRock ETF, MicroStrategy, treasury reserves — the case for a 1–5% portfolio allocation.' },
+      { title: 'Bitcoin Halving and the 4-Year Cycle', channel: 'Various', duration: '~15 min', search: 'bitcoin+halving+4+year+cycle+explained+bull+bear+market', note: 'How BTC halvings interact with Fed liquidity cycles and global risk-on/risk-off environments.' },
+    ]
+  },
+];
+
+function renderVideoLibrary() {
+  const tabsEl = document.getElementById('video-cat-tabs');
+  const gridEl = document.getElementById('video-grid');
+  if (!tabsEl || !gridEl) return;
+
+  let activeCat = 'macro';
+
+  function renderTabs() {
+    tabsEl.innerHTML = VIDEO_LIBRARY.map(c => `
+      <button class="vid-cat-btn ${c.cat === activeCat ? 'active' : ''}" data-cat="${c.cat}">${c.label}</button>
+    `).join('');
+    tabsEl.querySelectorAll('.vid-cat-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeCat = btn.dataset.cat;
+        renderTabs();
+        renderGrid();
+      });
+    });
+  }
+
+  function renderGrid() {
+    const cat = VIDEO_LIBRARY.find(c => c.cat === activeCat);
+    if (!cat) return;
+    gridEl.innerHTML = cat.videos.map((v, i) => {
+      const cardId = `vid-${activeCat}-${i}`;
+      const hasEmbed = !!v.id;
+      const thumbHtml = v.id
+        ? `<img class="vid-thumb" src="https://img.youtube.com/vi/${v.id}/maxresdefault.jpg" alt="${v.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          + `<div class="vid-thumb-placeholder" style="display:none">▶️</div>`
+        : `<div class="vid-thumb-placeholder" style="font-size:1.8rem;color:rgba(255,255,255,0.3)">▶</div>`;
+
+      const badge = hasEmbed
+        ? `<span class="absolute top-2 right-2 bg-black/75 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full tracking-wide">▶ Play</span>`
+        : `<span class="absolute top-2 right-2 bg-black/75 text-slate-400 text-[10px] font-semibold px-1.5 py-0.5 rounded-full tracking-wide">↗ YouTube</span>`;
+
+      return `
+        <div class="vid-card" id="${cardId}" data-id="${v.id || ''}" data-search="${v.search || ''}">
+          <div class="vid-thumb-wrap relative" onclick="toggleVideo('${cardId}')">
+            ${thumbHtml}
+            ${badge}
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div class="w-11 h-11 bg-black/65 rounded-full flex items-center justify-center">
+                <span class="text-lg ml-0.5 text-white">▶</span>
+              </div>
+            </div>
+          </div>
+          <div class="vid-embed" id="${cardId}-embed"></div>
+          <div class="px-3.5 pt-3 pb-3.5 cursor-pointer" onclick="toggleVideo('${cardId}')">
+            <div class="text-[13px] font-semibold text-slate-900 leading-snug mb-0.5">${v.title}</div>
+            <div class="text-[11px] text-slate-500 mb-1">${v.channel} · ${v.duration}</div>
+            <div class="text-[11px] text-slate-400 leading-snug">${v.note}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.toggleVideo = function(cardId) {
+    const card = document.getElementById(cardId);
+    const embedEl = document.getElementById(cardId + '-embed');
+    if (!card || !embedEl) return;
+
+    const videoId = card.dataset.id;
+    const search = card.dataset.search;
+
+    if (!videoId) {
+      // No embed ID — open YouTube search in new tab
+      window.open(`https://www.youtube.com/results?search_query=${search}`, '_blank', 'noopener');
+      return;
+    }
+
+    const isOpen = embedEl.classList.contains('open');
+    // Close all other embeds first
+    document.querySelectorAll('.vid-embed.open').forEach(el => {
+      el.classList.remove('open');
+      el.innerHTML = '';
+    });
+
+    if (!isOpen) {
+      embedEl.classList.add('open');
+      embedEl.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+      embedEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
+  renderTabs();
+  renderGrid();
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1176,6 +1348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const season = await loadTheme();
   renderPhases(season);
   renderAllocations();
+  renderVideoLibrary();
   loadGlossary();
   console.log('[Learn] Init complete. Cheat sheets load on accordion click.');
 });

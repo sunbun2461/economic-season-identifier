@@ -93,7 +93,7 @@ function buildHeader(activePage, onOverride) {
   header.innerHTML = `
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
       <a href="/" class="flex items-center gap-3" style="text-decoration:none;flex-shrink:0">
-        <div style="width:34px;height:34px;background:var(--season-primary);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:background 0.35s ease;">📈</div>
+        <div style="width:34px;height:34px;background:var(--season-primary);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:background 0.35s ease;">📈</div>
         <div>
           <div style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;line-height:1.2;color:white;letter-spacing:0.01em">Macro Cycle Tracker</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.3;font-weight:500">Economic Season Identifier</div>
@@ -105,7 +105,7 @@ function buildHeader(activePage, onOverride) {
       <div class="flex items-center gap-2" style="flex-shrink:0">
         <div class="hidden sm:flex items-center gap-2">
           <label style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.45);white-space:nowrap">Simulate:</label>
-          <select id="phase-override" style="font-size:12px;padding:5px 8px;border-radius:8px;cursor:pointer;font-weight:500;background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.14);outline:none;">
+          <select id="phase-override" style="font-size:12px;padding:5px 8px;border-radius:4px;cursor:pointer;font-weight:500;background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.14);outline:none;">
             <option value="" style="background:#1e293b;color:white">— Live Data —</option>
             ${ALL_PHASES.map(p => `<option value="${p.season}|${p.phase}" style="background:#1e293b;color:white">${p.emoji} ${p.label}</option>`).join('')}
           </select>

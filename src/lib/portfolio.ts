@@ -5,11 +5,21 @@ export function buildPortfolioRec(seasonResult: SeasonResult, snapshot: MacroSna
   const { season, phase, confidence, detectedOverlays } = seasonResult;
   const model = getPhaseModel(season, phase);
 
-  // Start with base model
+  // Deep clone mutable fields so overlays don't mutate the shared phaseModel singleton
   let rec: PortfolioRec = {
     ...model,
     confidence,
     appliedOverlays: [],
+    allocation: {
+      equities: { ...model.allocation.equities },
+      bonds:    { ...model.allocation.bonds },
+      cash:     { ...model.allocation.cash },
+      alts:     { ...model.allocation.alts },
+    },
+    bondTypes: model.bondTypes.map(b => ({ ...b })),
+    buy:       model.buy.map(b => ({ ...b })),
+    hold:      model.hold.map(b => ({ ...b })),
+    sell:      model.sell.map(b => ({ ...b })),
   };
 
   // Apply setup overlays based on detected conditions
