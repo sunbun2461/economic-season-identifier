@@ -4,11 +4,15 @@
   "description": "Macro economic cycle tracker with season classification and portfolio guidance",
   "type": "module",
   "scripts": {
-    "dev": "npx tsx src/server.ts",
-    "start": "npx tsx src/server.ts",
+    "dev:api": "npx tsx src/server.ts",
+    "dev:ui": "cd client && npm run dev",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:ui\"",
+    "build": "cd client && npm run build",
+    "start": "npm run build && npx tsx src/server.ts",
     "cli": "npx tsx src/cli.ts"
   },
   "dependencies": {
+    "concurrently": "^8.2.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2"
   },

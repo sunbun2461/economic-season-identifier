@@ -1,0 +1,28 @@
+import { Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import SeasonKeyBar from './components/SeasonKeyBar';
+import TickerTape from './components/TickerTape';
+import Dashboard from './pages/Dashboard';
+import Learn from './pages/Learn';
+import Playbook from './pages/Playbook';
+import History from './pages/History';
+import Charts from './pages/Charts';
+import About from './pages/About';
+
+export default function App() {
+  return (
+    <div className="min-h-screen" style={{ background: 'var(--page-bg)' }}>
+      <TickerTape />
+      <Header />
+      <SeasonKeyBar />
+      <Routes>
+        <Route path="/"         element={<Dashboard />} />
+        <Route path="/learn"    element={<Learn />} />
+        <Route path="/playbook" element={<Playbook />} />
+        <Route path="/history"  element={<History />} />
+        <Route path="/charts"   element={<Charts />} />
+        <Route path="/about"    element={<About />} />
+      </Routes>
+    </div>
+  );
+}

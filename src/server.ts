@@ -27,7 +27,8 @@ if (!FRED_API_KEY) {
   console.warn('⚠️  FRED_API_KEY not set. Set it in .env file. Data will not load.');
 }
 
-// Serve static files
+// Serve static files — React build in production, public/ as fallback
+app.use(express.static(join(__dirname, '..', 'client-dist')));
 app.use(express.static(join(__dirname, '..', 'public')));
 
 // Cache for API responses (in-memory, refreshed when FRED cache refreshes)
@@ -110,6 +111,16 @@ app.get('/api/phases', (req, res) => {
 // GET /api/theme — Season palette info
 app.get('/api/theme', (req, res) => {
   res.json({ palettes: SEASON_PALETTES, phases: ALL_PHASES });
+});
+
+// SPA fallback — serve index.html for all non-API routes (React Router)
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    const indexPath = join(__dirname, '..', 'client-dist', 'index.html');
+    res.sendFile(indexPath, err => {
+      if (err) res.status(404).send('Not found');
+    });
+  }
 });
 
 // Start server
