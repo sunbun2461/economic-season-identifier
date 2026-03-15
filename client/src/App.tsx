@@ -8,6 +8,7 @@ import Playbook from './pages/Playbook';
 import History from './pages/History';
 import Charts from './pages/Charts';
 import About from './pages/About';
+import Portfolio from './pages/Portfolio';
 
 export default function App() {
   return (
@@ -16,12 +17,13 @@ export default function App() {
       <Header />
       <SeasonKeyBar />
       <Routes>
-        <Route path="/"         element={<Dashboard />} />
-        <Route path="/learn"    element={<Learn />} />
-        <Route path="/playbook" element={<Playbook />} />
-        <Route path="/history"  element={<History />} />
-        <Route path="/charts"   element={<Charts />} />
-        <Route path="/about"    element={<About />} />
+        <Route path="/"           element={<Dashboard />} />
+        <Route path="/learn"      element={<Learn />} />
+        <Route path="/playbook"   element={<Playbook />} />
+        <Route path="/history"    element={<History />} />
+        <Route path="/charts"     element={<Charts />} />
+        <Route path="/about"      element={<About />} />
+        <Route path="/portfolio"  element={<Portfolio />} />
       </Routes>
     </div>
   );

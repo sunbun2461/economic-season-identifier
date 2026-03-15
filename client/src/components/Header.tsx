@@ -10,7 +10,7 @@ const NAV_PAGES = [
   { to: '/history',   label: 'History',   emoji: '📜' },
   { to: '/charts',    label: 'Charts',    emoji: '📈' },
   { to: '/about',     label: 'About',     emoji: 'ℹ️'  },
-  { to: '/portfolio', label: 'Portfolio', emoji: '💼' },
+  { to: '/portfolio', label: 'Portfolio', emoji: '💰' },
 ];
 
 export default function Header() {
