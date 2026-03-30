@@ -17,6 +17,7 @@ import { glossaryTerms } from './data/glossary.js';
 import { getAllPhaseModels } from './data/portfolio-models.js';
 import { SEASON_PALETTES, ALL_PHASES } from './lib/theme.js';
 import { supabase } from './lib/supabaseClient.js';
+import { logSeasonToSupabase } from './lib/seasonLog.js';
 import { getStockPrice, getCryptoPrice, CRYPTO_IDS } from './lib/priceService.js';
 import type { ApiDataResponse, ApiHistoryResponse } from './types.js';
 
@@ -63,6 +64,7 @@ app.get('/api/data', async (req, res) => {
   try {
     const data = await buildApiResponse();
     lastApiResponse = data;
+    logSeasonToSupabase(data.season, data.snapshot).catch(() => {});
     res.json(data);
   } catch (err) {
     console.error('Error in /api/data:', err);

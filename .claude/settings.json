@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -1 /Users/thomasrio/thomas_projects/2026_learning/economic_season_identifier/public/*.html)"
+    ]
+  }
+}
