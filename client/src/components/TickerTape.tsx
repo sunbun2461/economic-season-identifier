@@ -7,6 +7,7 @@ const SYMBOLS = [
   { proName: 'BITSTAMP:BTCUSD', title: 'Bitcoin' },
   { proName: 'BITSTAMP:ETHUSD', title: 'Ethereum' },
   { proName: 'COINBASE:SOLUSD', title: 'Solana' },
+  { proName: 'COINBASE:SUIUSD', title: 'SUI' },
   { proName: 'TVC:GOLD', title: 'Gold' },
   { proName: 'TVC:US10Y', title: '10Y Yield' },
   { proName: 'ECONOMICS:USINTR', title: 'Fed Rate' },

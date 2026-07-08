@@ -9,6 +9,7 @@ import History from './pages/History';
 import Charts from './pages/Charts';
 import About from './pages/About';
 import Portfolio from './pages/Portfolio';
+import Screener from './pages/Screener';
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/charts"     element={<Charts />} />
         <Route path="/about"      element={<About />} />
         <Route path="/portfolio"  element={<Portfolio />} />
+        <Route path="/screener"   element={<Screener />} />
       </Routes>
     </div>
   );

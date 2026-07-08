@@ -11,6 +11,7 @@ const NAV_PAGES = [
   { to: '/charts',    label: 'Charts',    emoji: '📈' },
   { to: '/about',     label: 'About',     emoji: 'ℹ️'  },
   { to: '/portfolio', label: 'Portfolio', emoji: '💰' },
+  { to: '/screener',  label: 'Screener',  emoji: '🔍' },
 ];
 
 export default function Header() {

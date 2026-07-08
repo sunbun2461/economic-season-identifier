@@ -16,9 +16,10 @@ import { chartCategories } from './data/tradingview.js';
 import { glossaryTerms } from './data/glossary.js';
 import { getAllPhaseModels } from './data/portfolio-models.js';
 import { SEASON_PALETTES, ALL_PHASES } from './lib/theme.js';
-import { supabase } from './lib/supabaseClient.js';
-import { logSeasonToSupabase } from './lib/seasonLog.js';
+import db from './lib/db.js';
+import { logSeasonToDb } from './lib/seasonLog.js';
 import { getStockPrice, getCryptoPrice, CRYPTO_IDS } from './lib/priceService.js';
+import { runScreener, analyzeStock } from './lib/screener.js';
 import type { ApiDataResponse, ApiHistoryResponse } from './types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -64,7 +65,7 @@ app.get('/api/data', async (req, res) => {
   try {
     const data = await buildApiResponse();
     lastApiResponse = data;
-    logSeasonToSupabase(data.season, data.snapshot).catch(() => {});
+    logSeasonToDb(data.season, data.snapshot);
     res.json(data);
   } catch (err) {
     console.error('Error in /api/data:', err);
@@ -146,94 +147,118 @@ app.get('/api/price/:symbol', async (req, res) => {
 });
 
 // POST /api/portfolio/positions — Add a position
-app.post('/api/portfolio/positions', async (req, res) => {
-  const db = supabase;
-  if (!db) return res.status(503).json({ error: 'Supabase not configured' });
+app.post('/api/portfolio/positions', (req, res) => {
   const { symbol, name, asset_type, mode, quantity, static_value, notes } = req.body;
   if (!name || !asset_type || !mode) {
     return res.status(400).json({ error: 'name, asset_type, and mode are required' });
   }
-  const { data, error } = await db.from('positions').insert({
-    symbol: symbol ?? null,
-    name,
-    asset_type,
-    mode,
-    quantity: quantity ?? null,
-    static_value: static_value ?? null,
-    notes: notes ?? null,
-  }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  try {
+    const row = db.prepare(`
+      INSERT INTO positions (symbol, name, asset_type, mode, quantity, static_value, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+      RETURNING *
+    `).get(symbol ?? null, name, asset_type, mode, quantity ?? null, static_value ?? null, notes ?? null);
+    res.json(row);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
 });
 
 // GET /api/portfolio/positions — Get all positions with live prices
 app.get('/api/portfolio/positions', async (req, res) => {
-  const db = supabase;
-  if (!db) return res.status(503).json({ error: 'Supabase not configured' });
-  const { data: positions, error } = await db.from('positions').select('*').order('created_at');
-  if (error) return res.status(500).json({ error: error.message });
-
-  // Enrich auto positions with live prices
-  const enriched = await Promise.all((positions ?? []).map(async (pos: Record<string, unknown>) => {
-    if (pos.mode !== 'auto' || !pos.symbol) return { ...pos, price: null, value: pos.static_value };
-    try {
-      const assetType = pos.asset_type as string;
-      const symbol = pos.symbol as string;
-      let priceData: { price: number; name: string };
-      if (assetType === 'crypto') {
-        const coinId = CRYPTO_IDS[symbol.toUpperCase()] ?? symbol.toLowerCase();
-        priceData = await getCryptoPrice(coinId);
-      } else {
-        priceData = await getStockPrice(symbol);
+  try {
+    const positions = db.prepare('SELECT * FROM positions ORDER BY created_at').all() as Record<string, unknown>[];
+    const enriched = await Promise.all(positions.map(async (pos) => {
+      if (pos.mode !== 'auto' || !pos.symbol) return { ...pos, price: null, value: pos.static_value };
+      try {
+        const symbol = pos.symbol as string;
+        let priceData: { price: number; name: string };
+        if (pos.asset_type === 'crypto') {
+          const coinId = CRYPTO_IDS[symbol.toUpperCase()] ?? symbol.toLowerCase();
+          priceData = await getCryptoPrice(coinId);
+        } else {
+          priceData = await getStockPrice(symbol);
+        }
+        const qty = typeof pos.quantity === 'number' ? pos.quantity : parseFloat(String(pos.quantity ?? 0));
+        return { ...pos, price: priceData.price, value: priceData.price * qty };
+      } catch {
+        return { ...pos, price: null, value: null };
       }
-      const qty = typeof pos.quantity === 'number' ? pos.quantity : parseFloat(String(pos.quantity ?? 0));
-      return { ...pos, price: priceData.price, value: priceData.price * qty };
-    } catch {
-      return { ...pos, price: null, value: null };
-    }
-  }));
-
-  res.json({ positions: enriched });
+    }));
+    res.json({ positions: enriched });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
 });
 
 // DELETE /api/portfolio/positions/:id — Delete a position
-app.delete('/api/portfolio/positions/:id', async (req, res) => {
-  const db = supabase;
-  if (!db) return res.status(503).json({ error: 'Supabase not configured' });
-  const { error } = await db.from('positions').delete().eq('id', req.params.id);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ ok: true });
+app.delete('/api/portfolio/positions/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM positions WHERE id = ?').run(req.params.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
 });
 
-// POST /api/portfolio/snapshot — Create a weekly snapshot
-app.post('/api/portfolio/snapshot', async (req, res) => {
-  const db = supabase;
-  if (!db) return res.status(503).json({ error: 'Supabase not configured' });
+// POST /api/portfolio/snapshot — Upsert today's snapshot
+app.post('/api/portfolio/snapshot', (req, res) => {
   const { total_value, positions_json, week_change_pct } = req.body;
   if (total_value == null || !positions_json) {
     return res.status(400).json({ error: 'total_value and positions_json are required' });
   }
-  const today = new Date().toISOString().split('T')[0];
-  const { data, error } = await db.from('portfolio_snapshots').upsert({
-    snapshot_date: today,
-    total_value,
-    positions_json,
-    week_change_pct: week_change_pct ?? null,
-  }, { onConflict: 'user_id,snapshot_date' }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const row = db.prepare(`
+      INSERT INTO portfolio_snapshots (snapshot_date, total_value, positions_json, week_change_pct)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(snapshot_date) DO UPDATE SET
+        total_value     = excluded.total_value,
+        positions_json  = excluded.positions_json,
+        week_change_pct = excluded.week_change_pct
+      RETURNING *
+    `).get(today, total_value, typeof positions_json === 'string' ? positions_json : JSON.stringify(positions_json), week_change_pct ?? null);
+    res.json(row);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
 });
 
-// GET /api/portfolio/snapshots — Get snapshot history
-app.get('/api/portfolio/snapshots', async (req, res) => {
-  const db = supabase;
-  if (!db) return res.status(503).json({ error: 'Supabase not configured' });
-  const { data, error } = await db.from('portfolio_snapshots')
-    .select('id, snapshot_date, total_value, week_change_pct, created_at')
-    .order('snapshot_date', { ascending: false })
-    .limit(52);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ snapshots: data });
+// GET /api/portfolio/snapshots — Last 52 weekly snapshots
+app.get('/api/portfolio/snapshots', (req, res) => {
+  try {
+    const snapshots = db.prepare(`
+      SELECT id, snapshot_date, total_value, week_change_pct, created_at
+      FROM portfolio_snapshots
+      ORDER BY snapshot_date DESC
+      LIMIT 52
+    `).all();
+    res.json({ snapshots });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+// GET /api/screener — Auto-scan all 3 cap tiers for beaten-down stocks with strong fundamentals
+app.get('/api/screener', async (req, res) => {
+  try {
+    const data = await runScreener('');
+    res.json(data);
+  } catch (err) {
+    res.status(503).json({ error: 'Screener unavailable', message: String(err) });
+  }
+});
+
+// GET /api/screener/analyze/:symbol — Scorecard for a single ticker
+app.get('/api/screener/analyze/:symbol', async (req, res) => {
+  const symbol = req.params.symbol.toUpperCase();
+  try {
+    const signal = await analyzeStock('', symbol);
+    if (!signal) return res.status(404).json({ error: 'Symbol not found', symbol });
+    res.json(signal);
+  } catch (err) {
+    res.status(503).json({ error: 'Analysis unavailable', message: String(err) });
+  }
 });
 
 // SPA fallback — serve index.html for all non-API routes (React Router)

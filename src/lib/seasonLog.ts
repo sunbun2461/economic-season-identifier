@@ -1,28 +1,20 @@
-import { supabase } from './supabaseClient.js';
+import db from './db.js';
 import type { SeasonResult, MacroSnapshot } from '../types.js';
 
-/**
- * Fire-and-forget: log a season classification result to Supabase.
- * Silently no-ops if Supabase is not configured.
- * Never throws — always catch at call site.
- */
-export async function logSeasonToSupabase(
-  season: SeasonResult,
-  snapshot: MacroSnapshot,
-): Promise<void> {
-  if (!supabase) return;
-
-  await supabase.from('season_log').insert({
-    season: season.season,
-    phase: season.phase,
-    confidence: season.confidence,
-    scores: {
-      spring: season.scores.spring,
-      summer: season.scores.summer,
-      autumn: season.scores.autumn,
-      winter: season.scores.winter,
-    },
-    fed_rate: snapshot.fedFunds?.current ?? null,
-    yield_curve: snapshot.t10y2y?.current ?? null,
-  });
+export function logSeasonToDb(season: SeasonResult, snapshot: MacroSnapshot): void {
+  try {
+    db.prepare(`
+      INSERT INTO season_log (season, phase, confidence, scores, fed_rate, yield_curve)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+      season.season,
+      season.phase,
+      season.confidence,
+      JSON.stringify(season.scores),
+      snapshot.rates?.fedFunds?.latest ?? null,
+      snapshot.rates?.t10y2y?.latest ?? null,
+    );
+  } catch {
+    // never crash the main request
+  }
 }

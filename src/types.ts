@@ -234,3 +234,32 @@ export interface ApiHistoryResponse {
     avgCycleLengthMonths: number;
   };
 }
+
+// --- Screener ---
+
+export interface ScreenerMetrics {
+  epsGrowthYoY: number | null;
+  revenueGrowthYoY: number | null;
+  netMargin: number | null;
+  debtEquity: number | null;
+  downsideFromHigh: number; // e.g. -0.32 = down 32%
+}
+
+export interface ScreenerSignal {
+  ticker: string;
+  company: string;
+  sector: string;
+  marketCap: number; // billions
+  price: number;
+  score: number;     // 0–100
+  metrics: ScreenerMetrics;
+  verdict: string;
+}
+
+export interface ApiScreenerResponse {
+  large: ScreenerSignal[];
+  mid: ScreenerSignal[];
+  small: ScreenerSignal[];
+  timestamp: string;
+  stale: boolean;
+}

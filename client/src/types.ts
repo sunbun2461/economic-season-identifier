@@ -85,6 +85,35 @@ export interface ApiHistoryResponse {
   stats: { totalCuts: number; totalHikes: number; totalHolds: number; avgCycleLengthMonths: number; };
 }
 
+// --- Screener ---
+
+export interface ScreenerMetrics {
+  epsGrowthYoY: number | null;
+  revenueGrowthYoY: number | null;
+  netMargin: number | null;
+  debtEquity: number | null;
+  downsideFromHigh: number;
+}
+
+export interface ScreenerSignal {
+  ticker: string;
+  company: string;
+  sector: string;
+  marketCap: number;
+  price: number;
+  score: number;
+  metrics: ScreenerMetrics;
+  verdict: string;
+}
+
+export interface ApiScreenerResponse {
+  large: ScreenerSignal[];
+  mid: ScreenerSignal[];
+  small: ScreenerSignal[];
+  timestamp: string;
+  stale: boolean;
+}
+
 export interface Palette {
   primary: string; accent: string; dark: string; bg: string; bgDark: string; emoji: string; label: string;
 }
